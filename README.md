@@ -1,11 +1,13 @@
+![Graphical_Abstract_3](https://github.com/user-attachments/assets/cf5be4d4-2d3e-4ccc-9aea-df1c756dafca
+)
+
 # PNcsp+
 
 This repository contains the AI assited version of the code implementation of the CSP method, as discussed in the paper [PNcsp+: A Periodic Number-Based Crystal Structure Prediction Method Enhanced by Machine Learning](https://pubs.acs.org/doi/full/10.1021/acs.jctc.6c00044), developed by the [TCCDEM](https://github.com/tccdem/) team. Currently MACE, M3GNet and ALIGNN-FF are suported.
 
 This work introduces a novel strategy for crystal structure prediction founded upon the principle of chemical similarity.  Our method uses Mendeleev's Periodic Number (PN) as a quantitative measure of substitutability to identify potential crystal structures for unexplored chemical systems. Representation of the workflow for predicting stable materials based on PN similarity is shown below. 
 
-![Graphical_Abstract_3](https://github.com/user-attachments/assets/cf5be4d4-2d3e-4ccc-9aea-df1c756dafca
-)
+
 
 PNcsp is a generaliezed version of this workflow. It scans the [OQMD](https://www.oqmd.org/) for a desired chemical system for given order of neighbors and proposes initial crystal structures that are ready for further analysis.
 
