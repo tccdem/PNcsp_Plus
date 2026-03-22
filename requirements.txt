@@ -1,0 +1,4 @@
+more-itertools==8.12.0
+qmpy_rester==0.2.0
+ase==3.22.1
+qmpy==1.4.0
