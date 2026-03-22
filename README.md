@@ -1,4 +1,4 @@
-<img width="2048" height="1743" alt="GA2_woTitle" src="https://github.com/user-attachments/assets/74ec1837-ab51-4c63-9d62-d71efffac5d0" /><img width="2048" height="1743" alt="GA2_woTitle" src="https://github.com/user-attachments/assets/7c87c875-e301-47f2-adf8-5f4896024b55" /># PNcsp+
+# PNcsp+
 
 This repository contains the AI assited version of the code implementation of the CSP method, as discussed in the paper [PNcsp+: A Periodic Number-Based Crystal Structure Prediction Method Enhanced by Machine Learning](https://pubs.acs.org/doi/full/10.1021/acs.jctc.6c00044), developed by the [TCCDEM](https://github.com/tccdem/) team. Currently MACE, M3GNet and ALIGNN-FF are suported.
 
