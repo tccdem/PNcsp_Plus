@@ -7,7 +7,7 @@ This repository contains the AI assited version of the code implementation of th
 
 This work introduces a novel strategy for crystal structure prediction founded upon the principle of chemical similarity.  Our method uses Mendeleev's Periodic Number (PN) as a quantitative measure of substitutability to identify potential crystal structures for unexplored chemical systems. Representation of the workflow for predicting stable materials based on PN similarity is shown below. 
 
-
+![Workflow](https://github.com/user-attachments/assets/37c070da-f9c4-4f12-8b44-00a3f08d9837)
 
 PNcsp is a generaliezed version of this workflow. It scans the [OQMD](https://www.oqmd.org/) for a desired chemical system for given order of neighbors and proposes initial crystal structures that are ready for further analysis.
 
