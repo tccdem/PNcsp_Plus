@@ -40,6 +40,8 @@ This program is based on Python 3 under Anaconda.
 
 \<online\>: Sets online (True) or offline (False) search in OQMD. For offline seach, you should download and set up offline OQMD database (https://oqmd.org/download/).  (default: "False")
 
+\<calculator\>: Sets calculator (M3Gnet, ALIGNN, MACE, Ensemble) (default: None)
+
 
 Created prototypes are shown in "output" folder in current directory.
 
