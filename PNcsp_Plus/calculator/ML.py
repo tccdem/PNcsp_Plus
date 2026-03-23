@@ -444,18 +444,18 @@ def M3GNet_calc(formula,path,path_results,relax):
             print(f"Predicted Energy= {final_energy_per_atom:.4f} eV/atom")
             final_structure_list.append({"CIF_Name":struct[4].replace(".cif",""),"Sym":struct[3],"Neigh_Order":struct[2],"Energy":final_energy_per_atom,"Target":struct[1],"Struc_Init":struct[0],"Struc_Final":final_structure,})
             if not os.path.exists(path_results+struct[4]+"_opt.cif"):
-                final_structure.to_file(path_results+struct[4]+"_M3Gnet.cif")
+                final_structure.to_file(path_results+struct[4]+"_M3GNet.cif")
             # print(f"Relaxed lattice parameter is {final_structure.lattice.abc[0]:.3f} Å")
             # print(f"Final energy is {final_energy_per_atom:.3f} eV/atom")
         df=pd.DataFrame(final_structure_list)
         df['Energy'] = df['Energy'].round(3)
         df=df.sort_values(by=["Energy"])
-        # df[["CIF_Name","Sym","Neigh_Order","Energy","Target"]].to_csv(path_results+"M3Gnet_"+final_structure_list[0]["Target"]+'_relaxed_all.csv', index=False)
-        df[["CIF_Name","Neigh_Order","Energy"]].to_csv(path_results+"M3Gnet_"+final_structure_list[0]["Target"]+'_relaxed_all.csv', index=False)
+        # df[["CIF_Name","Sym","Neigh_Order","Energy","Target"]].to_csv(path_results+"M3GNet_"+final_structure_list[0]["Target"]+'_relaxed_all.csv', index=False)
+        df[["CIF_Name","Neigh_Order","Energy"]].to_csv(path_results+"M3GNet_"+final_structure_list[0]["Target"]+'_relaxed_all.csv', index=False)
 
         df=df.drop_duplicates(subset=["Sym"])
-        # df[["CIF_Name","Sym","Neigh_Order","Energy","Target"]].to_csv(path_results+"M3Gnet_"+final_structure_list[0]["Target"]+'_relaxed_best.csv', index=False)
-        df[["CIF_Name","Neigh_Order","Energy"]].to_csv(path_results+"M3Gnet_"+final_structure_list[0]["Target"]+'_relaxed_best.csv', index=False)
+        # df[["CIF_Name","Sym","Neigh_Order","Energy","Target"]].to_csv(path_results+"M3GNet_"+final_structure_list[0]["Target"]+'_relaxed_best.csv', index=False)
+        df[["CIF_Name","Neigh_Order","Energy"]].to_csv(path_results+"M3GNet_"+final_structure_list[0]["Target"]+'_relaxed_best.csv', index=False)
     else:
         final_structure_list=[]
         model = M3GNet.load()  # defaults to "MP-2021.2.8-EFS" :contentReference
@@ -474,23 +474,23 @@ def M3GNet_calc(formula,path,path_results,relax):
             df=pd.DataFrame(final_structure_list)
             df['Energy'] = df['Energy'].round(3)
             df=df.sort_values(by=["Energy"])
-            # df[["CIF_Name","Sym","Neigh_Order","Energy","Target"]].to_csv(path_results+"M3Gnet_"+final_structure_list[0]["Target"]+'_all.csv', index=False)
-            df[["CIF_Name","Neigh_Order","Energy"]].to_csv(path_results+"M3Gnet_"+final_structure_list[0]["Target"]+'_all.csv', index=False)
+            # df[["CIF_Name","Sym","Neigh_Order","Energy","Target"]].to_csv(path_results+"M3GNet_"+final_structure_list[0]["Target"]+'_all.csv', index=False)
+            df[["CIF_Name","Neigh_Order","Energy"]].to_csv(path_results+"M3GNet_"+final_structure_list[0]["Target"]+'_all.csv', index=False)
 
             df=df.drop_duplicates(subset=["Sym"])
-            # df[["CIF_Name","Sym","Neigh_Order","Energy","Target"]].to_csv(path_results+"M3Gnet_"+final_structure_list[0]["Target"]+'_best.csv', index=False)
-            df[["CIF_Name","Neigh_Order","Energy"]].to_csv(path_results+"M3Gnet_"+final_structure_list[0]["Target"]+'_best.csv', index=False)
+            # df[["CIF_Name","Sym","Neigh_Order","Energy","Target"]].to_csv(path_results+"M3GNet_"+final_structure_list[0]["Target"]+'_best.csv', index=False)
+            df[["CIF_Name","Neigh_Order","Energy"]].to_csv(path_results+"M3GNet_"+final_structure_list[0]["Target"]+'_best.csv', index=False)
     print("Done")
     print("------------------------")
     print("Terminated Sucessfully!")
 
-def majority_vote(formula,path_alignn,path_mace,path_m3gnet,path_results, N_model=3):
+def ensemble_vote(formula,path_alignn,path_mace,path_m3gnet,path_results, N_model=2):
     if not os.path.exists(path_results):
         os.makedirs(path_results)
 
     if N_model==3:
         df_alignn=pd.read_csv(path_alignn+"ALIGNNFF_"+formula+"_all.csv")
-        df_m3gnet=pd.read_csv(path_m3gnet+"M3Gnet_"+formula+"_all.csv")
+        df_m3gnet=pd.read_csv(path_m3gnet+"M3GNet_"+formula+"_all.csv")
         df_mace=pd.read_csv(path_mace+"MACE_"+formula+"_all.csv")
 
         # merged_df=pd.merge(df_alignn, df_m3gnet, on='CIF_Name', how='inner')
@@ -504,8 +504,8 @@ def majority_vote(formula,path_alignn,path_mace,path_m3gnet,path_results, N_mode
 
         merged_df=merged_df.sort_values(by=["Mean_Energy"])
 
-        merged_df.to_csv(path_results+"MajorityVote_"+formula+"_all.csv",index=False)
-        # print("Majority vote is successfully determined.")
+        merged_df.to_csv(path_results+"EnsembleVote_"+formula+"_all.csv",index=False)
+        # print("Ensemble vote is successfully determined.")
 
         def extract_symmetry(name):
             match = name.split("_")[2]
@@ -515,10 +515,10 @@ def majority_vote(formula,path_alignn,path_mace,path_m3gnet,path_results, N_mode
 
         merged_df=merged_df.drop_duplicates(subset=["Sym"])
         merged_df = merged_df.drop(columns=["Sym"])
-        merged_df.to_csv(path_results+"MajorityVote_"+formula+"_best.csv",index=False)
+        merged_df.to_csv(path_results+"EnsembleVote_"+formula+"_best.csv",index=False)
         
     if N_model==2:
-        df_m3gnet=pd.read_csv(path_m3gnet+"M3Gnet_"+formula+"_all.csv")
+        df_m3gnet=pd.read_csv(path_m3gnet+"M3GNet_"+formula+"_all.csv")
         df_mace=pd.read_csv(path_mace+"MACE_"+formula+"_all.csv")
 
         # merged_df=pd.merge(df_alignn, df_m3gnet, on='CIF_Name', how='inner')
@@ -529,8 +529,8 @@ def majority_vote(formula,path_alignn,path_mace,path_m3gnet,path_results, N_mode
 
         merged_df=merged_df.sort_values(by=["Mean_Energy"])
 
-        merged_df.to_csv(path_results+"MajorityVote_"+formula+"_all.csv",index=False)
-        # print("Majority vote is successfully determined.")
+        merged_df.to_csv(path_results+"EnsembleVote_"+formula+"_all.csv",index=False)
+        # print("Ensemble vote is successfully determined.")
 
         def extract_symmetry(name):
             match = name.split("_")[2]
@@ -540,8 +540,8 @@ def majority_vote(formula,path_alignn,path_mace,path_m3gnet,path_results, N_mode
 
         merged_df=merged_df.drop_duplicates(subset=["Sym"])
         merged_df = merged_df.drop(columns=["Sym"])
-        merged_df.to_csv(path_results+"MajorityVote_"+formula+"_best.csv",index=False)
-    print("Majority vote is successfully determined.")
+        merged_df.to_csv(path_results+"EnsembleVote_"+formula+"_best.csv",index=False)
+    print("Ensemble vote is successfully determined.")
 
 
 

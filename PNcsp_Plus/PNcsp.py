@@ -229,7 +229,7 @@ def main():
     parser.add_argument('-f','--filter',default=0,help="Selected neighbors are limited to those below the energy filter value. (default: 0) unit: [eV/atom]. Use \"none\" for no filter.") 
     parser.add_argument('-t','--time_sleep',default="none",help="Set sleep time between queries. Excessive number of queries may cause the server to halt.(default: \"none\")")
     parser.add_argument('-o','--online',default="False",help="Sets online (True) or offline (False) search in OQMD (default: False). For offline seach, you should download and set up offline OQMD database. See https://oqmd.org/download/.")
-    parser.add_argument('-calc','--calculator',default="None",help="Sets calculator [M3Gnet, ALIGNN, MACE, majority]. (default: None).")
+    parser.add_argument('-calc','--calculator',default="None",help="Sets calculator [M3GNet, ALIGNN, MACE, ensemble]. (default: None).")
     parser.add_argument('-out','--output_dir',default=".",help="Sets output directory. Enter full path. (default: current directory).")
     parser.add_argument('--BlockSearch',help="Blocks search. In case you want to use only calculator but not search feature, use this flag.",action='store_true')
     parser.add_argument('--Relax',help="Sets Structure relaxation before ML evaluation.",action='store_true')
@@ -287,9 +287,9 @@ def main():
         categorize(N_neig=N_neig,formula=formula,data_path=data_path)
 
     path=data_path+"/output_"+formula+"/"
-    if(calculator=="M3Gnet"):
+    if(calculator=="M3GNet"):
         # ML.M3GNet_calc("./","./output_"+formula+"/Calc_report/")
-        path_results=data_path+"/output_"+formula+"/Calc_report/M3Gnet/"
+        path_results=data_path+"/output_"+formula+"/Calc_report/M3GNet/"
         if(Relax==True):
             ML.M3GNet_calc(formula,path,path_results,relax=True)
         else:
@@ -306,9 +306,9 @@ def main():
             ML.MACE_calc(formula,path,path_results,relax=True)
         else:
             ML.MACE_calc(formula,path,path_results,relax=False)
-    elif(calculator=="majority"):
-        # path_results="./DATA/DATA_180_4NN/output_"+formula+"/Calc_report/majority/"
-        path_results=data_path+"/output_"+formula+"/Calc_report/majority/"
+    elif(calculator=="ensemble"):
+        # path_results="./DATA/DATA_180_4NN/output_"+formula+"/Calc_report/ensemble/"
+        path_results=data_path+"/output_"+formula+"/Calc_report/ensemble/"
         if(Relax==True):
             print("\nERROR: You can not run Majority Vote with relaxation.\n")
         else:
@@ -320,12 +320,12 @@ def main():
             path_mace=data_path+"/output_"+formula+"/Calc_report/MACE/"
             ML.MACE_calc(formula,path,path_mace,relax=False)
 
-            # path_m3gnet="./DATA/DATA_180_4NN/output_"+formula+"/Calc_report/M3Gnet/"
-            path_m3gnet=data_path+"/output_"+formula+"/Calc_report/M3Gnet/"
+            # path_m3gnet="./DATA/DATA_180_4NN/output_"+formula+"/Calc_report/M3GNet/"
+            path_m3gnet=data_path+"/output_"+formula+"/Calc_report/M3GNet/"
             ML.M3GNet_calc(formula,path,path_m3gnet,relax=False)
             
             N_model=2 # 2 Model: m3gnet, mace 3 Model: alignn, m3gnet, mace
-            ML.majority_vote(formula,path_alignn,path_mace,path_m3gnet,path_results,N_model)
+            ML.ensemble_vote(formula,path_alignn,path_mace,path_m3gnet,path_results,N_model)
     else:
         pass
 
