@@ -45,7 +45,7 @@ This program is based on Python 3 under Anaconda.
 
 - `-calc`, `--calculator`  
   Selects calculator:  
-  `M3GNet`, `ALIGNN`, `MACE`, or `Ensemble`.  
+  `M3GNet`, `ALIGNN`, `MACE`, or `ensemble`.  
   **Default:** `None`.
 
 - `-out`, `--output_dir`  
