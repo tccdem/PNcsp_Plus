@@ -28,20 +28,8 @@ This program is based on Python 3 under Anaconda.
 ```
 5) Run the Python code:
 ```bash
-  python PNcsp.py <formula> -n <neighbor_order>  -f <energy_filter> -t <sleep_time> -o <online>
+  python PNcsp.py <formula> -n <neighbor_order>  -f <energy_filter> -c <calculator>
 ```
-\<formula\>: Pretty formula of chemical system for query (Ex. Cu2Mn1Al1)
-
-\<neighbor_order\>: Order of neighbors to be considered in the similarity search.. (Default: 1 (first order neighbors))
-
-\<energy_filter\>: Selected neighbors are limited to those below the energy filter value. (default: 0) unit: [eV/atom]. Use "none" to disable filter.
-
-\<sleep_time\>: Sets sleep time between queries. Excessive number of queries may cause the server to halt.(default: "none")
-
-\<online\>: Sets online (True) or offline (False) search in OQMD. For offline seach, you should download and set up offline OQMD database (https://oqmd.org/download/).  (default: "False")
-
-\<calculator\>: Sets calculator (M3Gnet, ALIGNN, MACE, Ensemble) (default: None)
-
 
 - `-n`, `--neighbor`  
   Order of neighbors to be considered in the similarity search.
@@ -51,21 +39,25 @@ This program is based on Python 3 under Anaconda.
   **Default:** `0` (unit: eV/atom).  
   Use `"none"` to disable filtering.
 
-- `-t`, `--time_sleep`  
-  Sets sleep time between queries.  
-  Excessive number of queries may cause the server to halt.  
-  **Default:** `"none"`.
+  - `-db`, `--database`  
+  Sets the data source: `OQMD`, `MP`, or `MPDS`.  
+  **Default:** `OQMD`.
 
 - `-o`, `--online`  
   Enables online (`True`) or offline (`False`) search in OQMD.  
-  **Default:** `False`.  
+  **Default:** `False`.
 
   For offline search, download and set up the offline OQMD database:  
   https://oqmd.org/download/
 
+- `-t`, `--time_sleep`  
+  Sets sleep time between queries for online search in OQMD.  
+  Excessive number of queries may cause the server to halt.  
+  **Default:** `"none"`.
+
 - `-calc`, `--calculator`  
   Selects calculator:  
-  `M3GNet`, `ALIGNN`, `MACE`, or `majority`.  
+  `M3GNet`, `ALIGNN`, `MACE`, or `Ensemble`.  
   **Default:** `None`.
 
 - `-out`, `--output_dir`  
@@ -79,9 +71,7 @@ This program is based on Python 3 under Anaconda.
 - `--Relax`  
   Performs structure relaxation before ML evaluation.
 
-- `-db`, `--database`  
-  Sets the data source: `OQMD`, `MP`, or `MPDS`.  
-  **Default:** `OQMD`.
+
 
 
 Created prototypes are shown in "output" folder in current directory.
