@@ -1,7 +1,9 @@
 def get_data_MP(comp_list,Energy_filter):
     from mp_api.client import MPRester
 
-    with MPRester("O0Ns7wNQJSYOTD4cog97Cj6M3Ch4n8gm") as mpr:
+    MP_API_KEY="Enter Your Key"
+
+    with MPRester(MP_API_KEY) as mpr:
         fields = [
         "formula_pretty",
         "composition_reduced",
