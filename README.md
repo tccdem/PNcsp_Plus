@@ -78,5 +78,5 @@ Created prototypes are shown in "output" folder in current directory.
 
 ### Example usage
 ```bash
-python Similarity.py Na2Cl1 -n 3 -f 0.1
+python Similarity.py Na2Cl1 -n 3 -f 0.1 -c MACE -db ./Outputs
 ```
