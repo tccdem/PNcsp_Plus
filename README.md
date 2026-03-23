@@ -43,6 +43,15 @@ This program is based on Python 3 under Anaconda.
   Sets the data source: `OQMD`, `MP`, or `MPDS`.  
   **Default:** `OQMD`.
 
+- `-calc`, `--calculator`  
+  Selects calculator:  
+  `M3GNet`, `ALIGNN`, `MACE`, or `Ensemble`.  
+  **Default:** `None`.
+
+- `-out`, `--output_dir`  
+  Sets output directory. Provide the full path.  
+  **Default:** current directory.
+
 - `-o`, `--online`  
   Enables online (`True`) or offline (`False`) search in OQMD.  
   **Default:** `False`.
@@ -54,15 +63,6 @@ This program is based on Python 3 under Anaconda.
   Sets sleep time between queries for online search in OQMD.  
   Excessive number of queries may cause the server to halt.  
   **Default:** `"none"`.
-
-- `-calc`, `--calculator`  
-  Selects calculator:  
-  `M3GNet`, `ALIGNN`, `MACE`, or `Ensemble`.  
-  **Default:** `None`.
-
-- `-out`, `--output_dir`  
-  Sets output directory. Provide the full path.  
-  **Default:** current directory.
 
 - `--BlockSearch`  
   Blocks the search stage.  
