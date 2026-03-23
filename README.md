@@ -43,38 +43,45 @@ This program is based on Python 3 under Anaconda.
 \<calculator\>: Sets calculator (M3Gnet, ALIGNN, MACE, Ensemble) (default: None)
 
 
-  -n NEIGHBOR, --neighbor NEIGHBOR
-                        Order of neighbors to be considered in the
-                        similarity search.
-  -f FILTER, --filter FILTER
-                        Selected neighbors are limited to those
-                        below the energy filter value. (default:
-                        0) unit: [eV/atom]. Use "none" for no
-                        filter.
-  -t TIME_SLEEP, --time_sleep TIME_SLEEP
-                        Set sleep time between queries. Excessive
-                        number of queries may cause the server to
-                        halt.(default: "none")
-  -o ONLINE, --online ONLINE
-                        Sets online (True) or offline (False)
-                        search in OQMD (default: False). For
-                        offline seach, you should download and set
-                        up offline OQMD database. See
-                        https://oqmd.org/download/.
-  -calc CALCULATOR, --calculator CALCULATOR
-                        Sets calculator [M3Gnet, ALIGNN, MACE,
-                        majority]. (default: None).
-  -out OUTPUT_DIR, --output_dir OUTPUT_DIR
-                        Sets output directory. Enter full path.
-                        (default: current directory).
-  --BlockSearch         Blocks search. In case you want to use
-                        only calculator but not search feature,
-                        use this flag.
-  --Relax               Sets Structure relaxation before ML
-                        evaluation.
-  -db DATABASE, --database DATABASE
-                        Sets data source [OQMD, MP, MPDS].
-                        (default: OQMD).
+- `-n`, `--neighbor`  
+  Order of neighbors to be considered in the similarity search.
+
+- `-f`, `--filter`  
+  Selected neighbors are limited to those below the energy filter value.  
+  **Default:** `0` (unit: eV/atom).  
+  Use `"none"` to disable filtering.
+
+- `-t`, `--time_sleep`  
+  Sets sleep time between queries.  
+  Excessive number of queries may cause the server to halt.  
+  **Default:** `"none"`.
+
+- `-o`, `--online`  
+  Enables online (`True`) or offline (`False`) search in OQMD.  
+  **Default:** `False`.  
+
+  For offline search, download and set up the offline OQMD database:  
+  https://oqmd.org/download/
+
+- `-calc`, `--calculator`  
+  Selects calculator:  
+  `M3GNet`, `ALIGNN`, `MACE`, or `majority`.  
+  **Default:** `None`.
+
+- `-out`, `--output_dir`  
+  Sets output directory. Provide the full path.  
+  **Default:** current directory.
+
+- `--BlockSearch`  
+  Blocks the search stage.  
+  Use this flag if you want to run only the calculator without the search feature.
+
+- `--Relax`  
+  Performs structure relaxation before ML evaluation.
+
+- `-db`, `--database`  
+  Sets the data source: `OQMD`, `MP`, or `MPDS`.  
+  **Default:** `OQMD`.
 
 
 Created prototypes are shown in "output" folder in current directory.
