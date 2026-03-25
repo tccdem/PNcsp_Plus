@@ -9,7 +9,7 @@ This work introduces a novel strategy for crystal structure prediction founded u
 
 ![Workflow](https://github.com/user-attachments/assets/37c070da-f9c4-4f12-8b44-00a3f08d9837)
 
-PNcsp is a generaliezed version of this workflow. It scans the [OQMD](https://www.oqmd.org/) for a desired chemical system for given order of neighbors and proposes initial crystal structures that are ready for further analysis.
+PNcsp+ with its default configuration scans a local instance of the [OQMD](https://www.oqmd.org/) for a desired chemical system for given order of neighbors and proposes crystal structures that are ready for further analysis. To set up OQMD locally, please refer to the [qmpy documantation](https://static.oqmd.org/static/docs/getting_started.html#setting-up-the-database).
 
 **PLEASE NOTE:** the PNcsp code is under active development. Bug reports are welcomed in the GitHub issues!
 
@@ -26,7 +26,7 @@ This program is based on Python 3 under Anaconda.
 ```bash
    python PNcsp.py -h
 ```
-5) Run the Python code:
+5) Run the Python code (minimal):
 ```bash
   python PNcsp.py <formula> -n <neighbor_order>  -f <energy_filter> -c <calculator>
 ```
@@ -45,8 +45,7 @@ This program is based on Python 3 under Anaconda.
 
 - `-calc`, `--calculator`  
   Selects calculator:  
-  `M3GNet`, `ALIGNN`, `MACE`, or `ensemble`.
-  Calculators are applied to all available neighbors.  
+  `M3GNet`, `ALIGNN`, `MACE`, or `ensemble`.  
   **Default:** `None`.
 
 - `-out`, `--output_dir`  
@@ -81,3 +80,4 @@ Created prototypes are shown in "output" folder in current directory.
 ```bash
 python Similarity.py Na2Cl1 -n 3 -f 0.1 -c MACE -out ./output_dir
 ```
+
