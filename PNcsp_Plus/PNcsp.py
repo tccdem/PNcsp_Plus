@@ -229,7 +229,7 @@ def main():
     parser.add_argument('-f','--filter',default=0,help="Selected neighbors are limited to those below the energy filter value. (default: 0) unit: [eV/atom]. Use \"none\" for no filter.") 
     parser.add_argument('-t','--time_sleep',default="none",help="Set sleep time between queries. Excessive number of queries may cause the server to halt.(default: \"none\")")
     parser.add_argument('-o','--online',default="False",help="Sets online (True) or offline (False) search in OQMD (default: False). For offline seach, you should download and set up offline OQMD database. See https://oqmd.org/download/.")
-    parser.add_argument('-calc','--calculator',default="None",help="Sets calculator [M3GNet, ALIGNN, MACE, ensemble]. (default: None).")
+    parser.add_argument('-calc','--calculator',default="None",help="Sets calculator [M3GNet, ALIGNN, MACE, ensemble]. Calculators are applied to all available neighbors. (default: None).")
     parser.add_argument('-out','--output_dir',default=".",help="Sets output directory. Enter full path. (default: current directory).")
     parser.add_argument('--BlockSearch',help="Blocks search. In case you want to use only calculator but not search feature, use this flag.",action='store_true')
     parser.add_argument('--Relax',help="Sets Structure relaxation before ML evaluation.",action='store_true')
