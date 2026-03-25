@@ -18,7 +18,7 @@ This program is based on Python 3 under Anaconda.
 
 1) Clone the repository.
 2) Open terminal and locate the directory.
-3) Install reuqirements or run:
+3) Install reuqirements (check also all_requirements.txt):
 ```bash
    pip install -r requirements.txt
 ```
