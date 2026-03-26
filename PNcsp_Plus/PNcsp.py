@@ -254,7 +254,7 @@ def main():
     if(args.filter =="none"):
         E_filter=args.filter
     else:
-        E_filter=int(args.filter)
+        E_filter=float(args.filter)
 
     if(args.output_dir[-1]=="/"):
         data_path=args.output_dir[:-1]
