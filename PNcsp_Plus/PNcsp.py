@@ -225,7 +225,7 @@ def show_config(formula,N_neig,E_filter,timer,online,calculator,database,BlockSe
 def main():
     parser = argparse.ArgumentParser(prog="PNcsp",description= "PNcsp: A PN similarty based initial structure generator.")
     parser.add_argument('formula')
-    parser.add_argument('-n','--neighbor',default=1,help="Order of neighbors to be considered in the similarity search.")
+    parser.add_argument('-n','--neighbor',default=1,help="Order of neighbors to be considered in the similarity search. (default: 1)")
     parser.add_argument('-f','--filter',default=0,help="Selected neighbors are limited to those below the energy filter value. (default: 0) unit: [eV/atom]. Use \"none\" for no filter.") 
     parser.add_argument('-t','--time_sleep',default="none",help="Set sleep time between queries. Excessive number of queries may cause the server to halt.(default: \"none\")")
     parser.add_argument('-o','--online',default="False",help="Sets online (True) or offline (False) search in OQMD (default: False). For offline seach, you should download and set up offline OQMD database. See https://oqmd.org/download/.")

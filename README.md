@@ -33,6 +33,7 @@ This program is based on Python 3 under Anaconda.
 
 - `-n`, `--neighbor`  
   Order of neighbors to be considered in the similarity search.
+  **Default:** `1`.
 
 - `-f`, `--filter`  
   Selected neighbors are limited to those below the energy filter value.  
