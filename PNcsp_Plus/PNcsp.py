@@ -217,7 +217,7 @@ def show_config(formula,N_neig,E_filter,timer,online,calculator,database,BlockSe
     print("---------------------")
     print("Query formula:\t",formula,"\nNeighbor order:\t",N_neig,
           "\nEnergy filter:\t",E_filter,"\nSleep timer:\t",timer,
-          "\nOnline: \t",online,"\nCalculator: \t",calculator,"\Data source: \t",database,
+          "\nOnline: \t",online,"\nCalculator: \t",calculator,"\nData source: \t",database,
           "\nBlockSearch: \t",BlockSearch,"\nRelaxer: \t",Relaxer,
           "\nOutputDir: \t",data_path)
     print("---------------------\n")
