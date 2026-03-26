@@ -1,7 +1,9 @@
 def get_data_MP(comp_list,Energy_filter):
     from mp_api.client import MPRester
 
-    MP_API_KEY="Enter Your Key"
+    Key_path="./dev/MP_API_KEY"
+    with open(Key_path, "r") as f:
+        MP_API_KEY = f.readline().strip()
 
     with MPRester(MP_API_KEY) as mpr:
         fields = [
