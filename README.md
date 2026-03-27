@@ -31,6 +31,25 @@ This program is based on Python 3 under Anaconda.
   python PNcsp.py <formula> -n <neighbor_order>  -f <energy_filter> -c <calculator>
 ```
 
+#### Special Instructions for Ubuntu 24.04 and ARM64 (aarch64)
+Ubuntu 24.04 ships with Python 3.12 by default, which is currently incompatible with the required TensorFlow version. Furthermore, ARM64 architectures require Python development headers to compile specific dependencies (like `matscipy`) from source. 
+To set up a compatible environment using Python 3.11
+
+```bash
+sudo apt install software-properties-common
+sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt update
+
+sudo apt install python3.11 python3.11-venv python3.11-dev
+
+python3.11 -m venv venv
+source venv/bin/activate
+
+pip3 install --upgrade pip
+pip3 install -r requirements.txt
+```
+
+
 - `-n`, `--neighbor`  
   Order of neighbors to be considered in the similarity search.
   **Default:** `1`.
