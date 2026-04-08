@@ -56,11 +56,20 @@ def create_prototype_OQMD(All_list, exchange_dict, formula,data_path):
     from math import gcd
     from functools import reduce
     import shutil
+    import pandas as pd
+
+    df_sym=pd.read_csv("/home/cem/PNcsp_Plus/PNcsp_Plus/db/data/Symbol_to_Number_strip.csv")
+
+    def ext_num(name):
+        number=df_sym[df_sym.Symbol==name]["Number"].values[0]
+        return number
 
     def write_CIF(elem_list_replaced, dest_path, formula, name, spacegroup, num2, ind_ext):
         struct = crystal(elem_list_replaced, site_list, cell=cell, size=(1, 1, 1))
 
-        filename = f"{dest_path}{formula}_{name}_{str(spacegroup).replace('/','')}_{num2}_{ind_ext}.cif"
+        # filename = f"{dest_path}{formula}_{name}_{str(spacegroup).replace('/','')}_{num2}_{ind_ext}.cif"
+        filename = f"{dest_path}{formula}_{name}_sym{str(spacegroup)}_{num2}_{ind_ext}.cif"
+
         write(filename, struct)
     
     def reduce_list(nums):
@@ -89,8 +98,10 @@ def create_prototype_OQMD(All_list, exchange_dict, formula,data_path):
         dest_path = f"{path}{neigh}_Neigh/"
 
         for num2, entry in enumerate(compound['data']):
+            print(entry)
             name = entry['name']
-            spacegroup = entry['spacegroup']
+            # spacegroup = entry['spacegroup']
+            spacegroup = ext_num(entry['spacegroup'].replace('/',''))
             cell = entry['unit_cell']
             sites = entry['sites']
 
