@@ -39,12 +39,15 @@ def create_prototype_MP(All_list, exchange_dict, formula, neigh,data_path):
 
     def write_CIF(elem_list_replaced, dest_path, formula, name, spacegroup, num2, ind_ext):
         struct = crystal(elem_list_replaced, site_list, cell=cell, size=(1, 1, 1))
-        filename = f"{dest_path}{formula}_{name}_{str(spacegroup).replace('/','')}_{num2}_{ind_ext}.cif"
+        # filename = f"{dest_path}{formula}_{name}_{str(spacegroup).replace('/','')}_{num2}_{ind_ext}.cif"
+        filename = f"{dest_path}{formula}_{name}_sym{str(spacegroup)}_{num2}_{ind_ext}.cif"
         write(filename, struct)
     
     def write_CIF2(struct, dest_path, formula, name, spacegroup, num2, ind_ext):
 
-        filename = f"{dest_path}{formula}_{name}_{str(spacegroup).replace('/','')}_{num2}_{ind_ext}.cif"
+        # filename = f"{dest_path}{formula}_{name}_{str(spacegroup).replace('/','')}_{num2}_{ind_ext}.cif"
+        filename = f"{dest_path}{formula}_{name}_sym{str(spacegroup)}_{num2}_{ind_ext}.cif"
+
         # write(filename, struct)
         struct.to(fmt="cif", filename=filename)
 
@@ -72,7 +75,8 @@ def create_prototype_MP(All_list, exchange_dict, formula, neigh,data_path):
         for num2, entry in enumerate(compound):
             name = entry.formula_pretty
             structure = entry.structure
-            spacegroup = entry.symmetry.symbol
+            # spacegroup = entry.symmetry.symbol
+            spacegroup = entry.symmetry.number
             site_list=[site.frac_coords for site in entry.structure]
             cell = entry.structure.lattice.parameters
 

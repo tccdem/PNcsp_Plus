@@ -56,7 +56,8 @@ def create_prototype_OQMD(All_list, exchange_dict, formula,data_path):
     def write_CIF(elem_list_replaced, dest_path, formula, name, spacegroup, num2, ind_ext):
         struct = crystal(elem_list_replaced, site_list, cell=cell, size=(1, 1, 1))
         
-        filename = f"{dest_path}{formula}_{name}_{str(spacegroup).replace('/','')}_{num2}_{ind_ext}.cif"
+        # filename = f"{dest_path}{formula}_{name}_{str(spacegroup).replace('/','')}_{num2}_{ind_ext}.cif"
+        filename = f"{dest_path}{formula}_{name}_sym{str(spacegroup)}_{num2}_{ind_ext}.cif"
         write(filename, struct)
     
     def reduce_list(nums):
@@ -83,7 +84,8 @@ def create_prototype_OQMD(All_list, exchange_dict, formula,data_path):
     for num1, compound in enumerate(All_list):
         for num2, entry in enumerate(compound['data']):
             name = entry['name']
-            spacegroup = entry['spacegroup'].symbol
+            # spacegroup = entry['spacegroup'].symbol
+            spacegroup = entry['spacegroup'].number
             cell = entry['cell']
             sites = entry['sites']
 

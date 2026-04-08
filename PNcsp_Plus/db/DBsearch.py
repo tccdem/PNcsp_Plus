@@ -28,9 +28,9 @@ def get_OQMD_data(formula,path):
     import shutil
     import qmpy
 
-    def write_CIF(elem_list, dest_path, formula, name, spacegroup_sym,spacegroup_num, ind_ext):
+    def write_CIF(elem_list, dest_path, formula,spacegroup_num, ind_ext):
         struct = crystal(elem_list, site_list, cell=cell, size=(1, 1, 1))
-        filename = f"{dest_path}{formula}_{str(spacegroup_sym).replace('/','')}_sym{spacegroup_num}_OQMD_{ind_ext+1}.cif"
+        filename = f"{dest_path}{formula}_sym{spacegroup_num}_OQMD_{ind_ext+1}.cif"
         write(filename, struct)
 
     def reduce_list(nums):
@@ -41,13 +41,6 @@ def get_OQMD_data(formula,path):
     def parse_formula_counts(formula):
         matches = re.findall(r'[A-Z][a-z]*|\d+', formula)
         return {matches[i]: int(matches[i+1]) for i in range(0, len(matches), 2)}
-
-    # def compare_structure():
-    #     target_path=f"{path}Original_Data/"
-    #     neigh_list = [file for file in os.listdir(path) if "_Neigh" in file]
-    #     predicted_path= f"{path}{neigh}_Neigh/"
-
-    #     pass
 
     All_list=[]
     Comp_ordered=offline_order([formula])[0]
@@ -67,14 +60,10 @@ def get_OQMD_data(formula,path):
 
     if not os.path.exists(dest_path):
             os.makedirs(dest_path)
-    else:
-        pass
-        # shutil.rmtree(dest_path)
-        # os.makedirs(dest_path)
 
     for ind_ext, entry in enumerate(target_data['data']):
         name = entry['name']
-        spacegroup_sym = entry['spacegroup'].symbol
+        # spacegroup_sym = entry['spacegroup'].symbol
         spacegroup_num = entry['spacegroup'].number
         cell = entry['cell']
         sites = entry['sites']
@@ -86,7 +75,7 @@ def get_OQMD_data(formula,path):
             site_list.append(tuple(coords.split()))
             elem_list.append(elem)      
 
-        write_CIF(elem_list, dest_path, formula, name, spacegroup_sym,spacegroup_num, ind_ext)
+        write_CIF(elem_list, dest_path, formula,spacegroup_num, ind_ext)
 
     print("OQMD data is collected!")
     return target_data
@@ -94,8 +83,8 @@ def get_OQMD_data(formula,path):
 def get_MP_data(formula,path):
     from mp_api.client import MPRester
 
-    def write_CIF(struct, dest_path, formula, name, spacegroup_sym,spacegroup_num, ind_ext):
-        filename = f"{dest_path}{formula}_{str(spacegroup_sym).replace('/','')}_sym{spacegroup_num}_MP_{ind_ext+1}.cif"
+    def write_CIF(struct, dest_path, formula,spacegroup_num, ind_ext):
+        filename = f"{dest_path}{formula}_sym{spacegroup_num}_MP_{ind_ext+1}.cif"
         # write(filename, struct)
         struct.to(fmt="cif", filename=filename)
 
@@ -124,10 +113,10 @@ def get_MP_data(formula,path):
     for ind_ext, entry in enumerate(target_data):
         name = entry.formula_pretty
         structure = entry.structure
-        spacegroup_sym = entry.symmetry.symbol
+        # spacegroup_sym = entry.symmetry.symbol
         spacegroup_num = entry.symmetry.number
 
-        write_CIF(structure, dest_path, formula, name, spacegroup_sym,spacegroup_num, ind_ext)
+        write_CIF(structure, dest_path, formula,spacegroup_num, ind_ext)
     
     print("MP data is collected!")
     return target_data
@@ -136,12 +125,8 @@ def compare_structures(formula,path):
 
     from pymatgen.analysis.structure_matcher import StructureMatcher
     from pymatgen.core import Structure
-    def ext_num(name):
-        df_sym=pd.read_csv("/mnt/depo/cem/Test_Paper5/Symbol_to_Number_strip.csv")
-        number=df_sym[df_sym.Symbol==name]["Number"].values[0]
-        return number
 
-    def ref_collector(formula, path):
+    def ref_collector(path):
         structure_ref = []
         known_path=os.path.join(path, "Known_Structures")
         struct_list=os.listdir(known_path)
@@ -156,7 +141,7 @@ def compare_structures(formula,path):
         return structure_ref
     
 
-    def predicted_collector(formula, path):
+    def predicted_collector(path):
         struct_list_init = []
 
         neigh_list = [x for x in os.listdir(path) if "Neigh" in x]
@@ -174,7 +159,6 @@ def compare_structures(formula,path):
 
             for sym in sym_list:
                 sym_path = os.path.join(neigh_path, sym)
-                sym_num=ext_num(sym)
                 if not os.path.isdir(sym_path):
                     continue
 
@@ -191,14 +175,14 @@ def compare_structures(formula,path):
 
                     try:
                         struct = Structure.from_file(target_path)
-                        struct_list_init.append([struct_name.replace(".cif",""),neigh,sym_num, struct])
+                        struct_list_init.append([struct_name.replace(".cif",""),neigh,int(sym.replace("sym","")), struct])
                     except Exception as e:
                         print(f"Could not read {target_path}: {e}")
 
         return struct_list_init
     
-    ref_df=pd.DataFrame(ref_collector(formula, path),columns=["CIF_Name","sym", "struct"])
-    my_df=pd.DataFrame(predicted_collector(formula, path),columns=["CIF_Name","Neigh_Order", "sym", "struct"])
+    ref_df=pd.DataFrame(ref_collector(path),columns=["CIF_Name","sym", "struct"])
+    my_df=pd.DataFrame(predicted_collector(path),columns=["CIF_Name","Neigh_Order", "sym", "struct"])
     sm = StructureMatcher()
 
     unique_list_sym=[]
@@ -225,6 +209,8 @@ def compare_structures(formula,path):
 
     print("Unique structures are successfully detected!!")
     my_df.drop(["struct"],axis=1,inplace=True)
+    dest_path=os.path.join(path,"Calc_report")
+    my_df.to_csv(os.path.join(dest_path,"Similarity_Report.csv"),index=False)
     my_df=my_df[(my_df["is_new_struc"]==True)]
     my_df.drop(["is_new_struc"],axis=1,inplace=True)
     return my_df
@@ -260,8 +246,8 @@ def matcher(formula,path,new_struc_df):
 
 def find_unique_data(formula,path):
 
-    # get_OQMD_data(formula,path)
-    # get_MP_data(formula,path)
+    get_OQMD_data(formula,path)
+    get_MP_data(formula,path)
     new_struc_df=compare_structures(formula,path)
     matcher(formula,path,new_struc_df)
 

@@ -204,7 +204,8 @@ def categorize(N_neig,formula,data_path):
     for cif in cifs:
         source_path=path+cif
 
-        sym=cif.split("_")[2]
+        # sym=cif.split("_")[2]
+        sym="sym"+cif.split("sym")[1].split("_")[0]
         dest_path=path+sym+"/"
 
         if not os.path.exists(dest_path):
