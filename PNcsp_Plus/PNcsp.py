@@ -234,6 +234,7 @@ def main():
     parser.add_argument('--BlockSearch',help="Blocks search. In case you want to use only calculator but not search feature, use this flag.",action='store_true')
     parser.add_argument('--Relax',help="Sets Structure relaxation before ML evaluation.",action='store_true')
     parser.add_argument('-db','--database',default="OQMD",help="Sets data source [OQMD, MP, MPDS]. (default: OQMD).")
+    parser.add_argument('--CheckUnique',help="Check if found structures have been already reported in OQMD and MP.",action='store_true')
 
     args = parser.parse_args()
 
@@ -244,6 +245,7 @@ def main():
     calculator=args.calculator
     database=args.database
     BlockSearch=args.BlockSearch
+    CheckUnique=args.CheckUnique
     Relax=args.Relax
     
     if(args.time_sleep =="none"):
@@ -262,7 +264,13 @@ def main():
         data_path=args.output_dir
 
     show_config(formula=formula,N_neig=N_neig,E_filter=E_filter,timer=time_sleep,online=online,calculator=calculator,database=database,BlockSearch=BlockSearch,Relaxer=Relax,data_path=data_path)
+    path=data_path+"/output_"+formula+"/"
     
+    if(CheckUnique==True):
+        from db import DBsearch
+        DBsearch.find_unique_data(formula,path)
+        exit(0)
+
     if(BlockSearch!=True):
         res,neigh_list,exchange_dict=get_Neig(formula=formula,N_neig=N_neig)
 
@@ -286,7 +294,7 @@ def main():
         print("TERMINATED SUCCESFULLY!\n")
         categorize(N_neig=N_neig,formula=formula,data_path=data_path)
 
-    path=data_path+"/output_"+formula+"/"
+    
     if(calculator=="M3GNet"):
         # ML.M3GNet_calc("./","./output_"+formula+"/Calc_report/")
         path_results=data_path+"/output_"+formula+"/Calc_report/M3GNet/"
