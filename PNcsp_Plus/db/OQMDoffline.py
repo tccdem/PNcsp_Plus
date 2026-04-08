@@ -21,7 +21,6 @@ def get_data_OQMD(Comp_list,neigh_list,Energy_filter):
     All_list=[]
     Comp_list_ordered=offline_order(Comp_list)
     print(Comp_list)
-    a=[]
     for i in range(len(Comp_list_ordered)):
         raw_data = qmpy.Entry.objects.filter(composition_id=Comp_list_ordered[i])
         if(len(raw_data)==0):
