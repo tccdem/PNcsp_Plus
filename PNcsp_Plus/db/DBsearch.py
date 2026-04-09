@@ -207,20 +207,21 @@ def compare_structures(formula,path):
     my_df["is_new_sym"]=unique_list_sym
     my_df["is_new_struc"]=unique_list_struc
 
-    print("Unique structures are successfully detected!!")
+    print("New structures are successfully detected!!")
     my_df.drop(["struct"],axis=1,inplace=True)
     dest_path=os.path.join(path,"Calc_report")
-    my_df.to_csv(os.path.join(dest_path,"Similarity_Report.csv"),index=False)
-    my_df=my_df[(my_df["is_new_struc"]==True)]
-    my_df.drop(["is_new_struc"],axis=1,inplace=True)
-    return my_df
+    my_df_new=my_df[(my_df["is_new_struc"]==True)].copy()
+    my_df_new.drop(["is_new_struc"],axis=1,inplace=True)
+    return my_df,my_df_new
 
-def matcher(formula,path,new_struc_df):
+def matcher(formula,path,struc_df,new_struc_df):
     dest_path=os.path.join(path,"Calc_report")
     if not os.path.exists(dest_path):
         os.makedirs(dest_path)
+        struc_df.to_csv(os.path.join(dest_path,"Similarity_Report.csv"),index=False)
         new_struc_df.to_csv(os.path.join(dest_path,"New_Structures.csv"),index=False)
     else:
+        struc_df.to_csv(os.path.join(dest_path,"Similarity_Report.csv"),index=False)
         folder_list = [name for name in os.listdir(dest_path) if os.path.isdir(os.path.join(dest_path, name))]
         for folder in folder_list:
             csv_path=os.path.join(dest_path,folder)
@@ -237,18 +238,31 @@ def matcher(formula,path,new_struc_df):
                 on=common_cols,
                 how="left"
             )
+
+            struc_df = struc_df.merge(
+                GNN_df[common_cols + extra_cols].drop_duplicates(subset=common_cols),
+                on=common_cols,
+                how="left"
+            )
+
             new_struc_df=new_struc_df.sort_values(by="Energy")
-            new_struc_df.to_csv(os.path.join(dest_path,folder+"_"+formula+"new_all.csv"),index=False)
+            new_struc_df.to_csv(os.path.join(dest_path,folder,folder+"_"+formula+"_newstruc_all.csv"),index=False)
 
             new_struc_df=new_struc_df.drop_duplicates(subset=["sym"])
-            new_struc_df.to_csv(os.path.join(dest_path,folder+"_"+formula+"new_best.csv"),index=False)
+            new_struc_df.to_csv(os.path.join(dest_path,folder,folder+"_"+formula+"_newstruc_best.csv"),index=False)
+
+            struc_df=struc_df.sort_values(by="Energy")
+            struc_df.to_csv(os.path.join(dest_path,folder,folder+"_"+formula+"_all.csv"),index=False)
+
+            struc_df=struc_df.drop_duplicates(subset=["sym"])
+            struc_df.to_csv(os.path.join(dest_path,folder,folder+"_"+formula+"_best.csv"),index=False)
 
 
 def find_unique_data(formula,path):
 
     get_OQMD_data(formula,path)
     get_MP_data(formula,path)
-    new_struc_df=compare_structures(formula,path)
-    matcher(formula,path,new_struc_df)
+    struc_df,new_struc_df=compare_structures(formula,path)
+    matcher(formula,path,struc_df,new_struc_df)
 
     

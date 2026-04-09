@@ -1,0 +1,31 @@
+data_image0
+_chemical_formula_structural       Al3Au3
+_chemical_formula_sum              "Al3 Au3"
+_cell_length_a       3.354832
+_cell_length_b       6.031628329935458
+_cell_length_c       7.856925143185787
+_cell_angle_alpha    72.43360396409076
+_cell_angle_beta     90.0
+_cell_angle_gamma    106.14703883180363
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Al  Al1       1.0  0.731  0.46199999999999997  0.05659999999999998  1.0000
+  Al  Al2       1.0  0.044  0.088  0.387  1.0000
+  Al  Al3       1.0  0.668  0.33599999999999997  0.668  1.0000
+  Au  Au1       1.0  0.0070699999999999045  0.014099999999999809  0.9960000000000001  1.0000
+  Au  Au2       1.0  0.32699999999999996  0.6539999999999999  0.334  1.0000
+  Au  Au3       1.0  0.38899999999999985  0.7779999999999998  0.7250000000000001  1.0000

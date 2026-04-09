@@ -1,0 +1,33 @@
+data_image0
+_chemical_formula_structural       Au4Al4
+_chemical_formula_sum              "Au4 Al4"
+_cell_length_a       6.2365483442654055
+_cell_length_b       2.9431326500000003
+_cell_length_c       6.328673814260221
+_cell_angle_alpha    90.0
+_cell_angle_beta     91.50863746522623
+_cell_angle_gamma    90.0
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Au  Au1       1.0  0.669  0.7499999999999999  0.00456  1.0000
+  Au  Au2       1.0  0.828  0.7499999999999999  0.4789999999999999  1.0000
+  Au  Au3       1.0  0.172  0.25  0.521  1.0000
+  Au  Au4       1.0  0.331  0.25  0.995  1.0000
+  Al  Al1       1.0  0.9549999999999998  0.25  0.17899999999999996  1.0000
+  Al  Al2       1.0  0.42899999999999994  0.7499999999999999  0.319  1.0000
+  Al  Al3       1.0  0.571  0.25  0.681  1.0000
+  Al  Al4       1.0  0.0453  0.7499999999999999  0.8209999999999998  1.0000
