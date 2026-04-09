@@ -1,0 +1,35 @@
+data_image0
+_chemical_formula_structural       Au5Al5
+_chemical_formula_sum              "Au5 Al5"
+_cell_length_a       7.1305318855031015
+_cell_length_b       7.1305318855031015
+_cell_length_c       8.645901340859261
+_cell_angle_alpha    125.83948843630591
+_cell_angle_beta     125.83948843630591
+_cell_angle_gamma    33.132445664724195
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Au  Au1       1.0  0.0  0.0  0.0  1.0000
+  Au  Au2       1.0  0.267  0.267  0.219  1.0000
+  Au  Au3       1.0  0.117  0.11699999999999999  0.439  1.0000
+  Au  Au4       1.0  0.8830000000000001  0.883  0.561  1.0000
+  Au  Au5       1.0  0.733  0.733  0.781  1.0000
+  Al  Al1       1.0  0.87  0.87  0.16200000000000003  1.0000
+  Al  Al2       1.0  0.6360000000000001  0.636  0.248  1.0000
+  Al  Al3       1.0  0.5  0.5  0.5  1.0000
+  Al  Al4       1.0  0.36400000000000005  0.364  0.752  1.0000
+  Al  Al5       1.0  0.12999999999999998  0.12999999999999998  0.838  1.0000

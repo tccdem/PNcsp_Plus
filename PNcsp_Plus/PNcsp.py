@@ -213,14 +213,14 @@ def categorize(N_neig,formula,data_path):
 
         dest = shutil.move(source_path, dest_path)  
 
-def show_config(formula,N_neig,E_filter,timer,online,calculator,database,BlockSearch,Relaxer,data_path):
+def show_config(formula,N_neig,E_filter,timer,online,calculator,database,BlockSearch,Relaxer,data_path,CheckNew):
     print("\nProgram Configuration")
     print("---------------------")
     print("Query formula:\t",formula,"\nNeighbor order:\t",N_neig,
           "\nEnergy filter:\t",E_filter,"\nSleep timer:\t",timer,
           "\nOnline: \t",online,"\nCalculator: \t",calculator,"\nData source: \t",database,
           "\nBlockSearch: \t",BlockSearch,"\nRelaxer: \t",Relaxer,
-          "\nOutputDir: \t",data_path)
+          "\nOutputDir: \t",data_path,"\nCheckNew: \t",CheckNew)
     print("---------------------\n")
 
 def main():
@@ -235,7 +235,7 @@ def main():
     parser.add_argument('--BlockSearch',help="Blocks search. In case you want to use only calculator but not search feature, use this flag.",action='store_true')
     parser.add_argument('--Relax',help="Sets Structure relaxation before ML evaluation.",action='store_true')
     parser.add_argument('-db','--database',default="OQMD",help="Sets data source [OQMD, MP, MPDS]. (default: OQMD).")
-    parser.add_argument('--CheckUnique',help="Check if found structures have been already reported in OQMD and MP.",action='store_true')
+    parser.add_argument('--CheckNew',help="Check if found structures have been already reported in OQMD and MP.",action='store_true')
 
     args = parser.parse_args()
 
@@ -246,7 +246,7 @@ def main():
     calculator=args.calculator
     database=args.database
     BlockSearch=args.BlockSearch
-    CheckUnique=args.CheckUnique
+    CheckNew=args.CheckNew
     Relax=args.Relax
     
     if(args.time_sleep =="none"):
@@ -264,10 +264,10 @@ def main():
     else:
         data_path=args.output_dir
 
-    show_config(formula=formula,N_neig=N_neig,E_filter=E_filter,timer=time_sleep,online=online,calculator=calculator,database=database,BlockSearch=BlockSearch,Relaxer=Relax,data_path=data_path)
+    show_config(formula=formula,N_neig=N_neig,E_filter=E_filter,timer=time_sleep,online=online,calculator=calculator,database=database,BlockSearch=BlockSearch,Relaxer=Relax,data_path=data_path,CheckNew=CheckNew)
     path=data_path+"/output_"+formula+"/"
     
-    if(CheckUnique==True):
+    if(CheckNew==True):
         from db import DBsearch
         DBsearch.find_unique_data(formula,path)
         exit(0)
