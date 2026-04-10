@@ -246,10 +246,10 @@ def matcher(formula,path,struc_df,new_struc_df):
             )
 
             new_struc_df=new_struc_df.sort_values(by="Energy")
-            new_struc_df.to_csv(os.path.join(dest_path,folder,folder+"_"+formula+"_newstruc_all.csv"),index=False)
+            new_struc_df.to_csv(os.path.join(dest_path,folder,folder+"_"+formula+"_all_OnlyNew.csv"),index=False)
 
             new_struc_df=new_struc_df.drop_duplicates(subset=["sym"])
-            new_struc_df.to_csv(os.path.join(dest_path,folder,folder+"_"+formula+"_newstruc_best.csv"),index=False)
+            new_struc_df.to_csv(os.path.join(dest_path,folder,folder+"_"+formula+"_best_OnlyNew.csv"),index=False)
 
             struc_df=struc_df.sort_values(by="Energy")
             struc_df.to_csv(os.path.join(dest_path,folder,folder+"_"+formula+"_all.csv"),index=False)
