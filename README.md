@@ -72,7 +72,7 @@ This program is based on Python 3 under Anaconda.
 - `--Relax`  
   Performs structure relaxation before ML evaluation.
 - `--CheckNew`
-   Check if found structures have been already reported in OQMD and MP.
+  Check if found structures have been already reported in OQMD and MP.
 - `-top_n`, `--top_n_new`
   Copies the top-n evaluated new structures, ranked by the GNN evaluation, to the Best_Structures folder if available [int, "all", "none"]. (default: none).
   Use this option together with --CheckNew, or in a subsequent run after a run performed with --CheckNew.
