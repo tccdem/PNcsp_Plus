@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Path to your PNcsp Python script or executable
-OUT="test_data"
+OUT="dev/test_data"
 
 # List of compounds
 COMPOUNDS=(
@@ -33,18 +33,10 @@ date
 for compound in "${COMPOUNDS[@]}"; do
     PNCSP_CMD=(python PNcsp.py "$compound" -out "$OUT")
     echo "***** $compound ******";
-    "${PNCSP_CMD[@]}" -calc MACE --BlockSearch;
+    "${PNCSP_CMD[@]}" -calc MACE --BlockSearch --CheckNew -top_n all;
     echo "***********************";
     echo "----------------------------";
 done
 
 echo "+++ date 3 +++";
 date
-
-for compound in "${COMPOUNDS[@]}"; do
-    PNCSP_CMD=(python PNcsp.py "$compound" -out "$OUT")
-    echo "***** $compound ******";
-    "${PNCSP_CMD[@]}" --CheckNew;
-    echo "***********************";
-    echo "----------------------------";
-done

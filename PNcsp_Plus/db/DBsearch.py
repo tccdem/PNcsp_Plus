@@ -9,8 +9,6 @@ def offline_order(Comp_list):
         comp_id=sorted(comp_id)
         comp_query=""
         for j in range(len(comp_id)):
-            # if not re.search(r'\d', comp_id[i]):
-            #     comp_id[i]=comp_id[i]+"1"
             comp_query+=comp_id[j]
             if (j!=len(comp_id)-1):
                 comp_query+=" "
@@ -184,6 +182,8 @@ def compare_structures(formula,path):
     ref_df=pd.DataFrame(ref_collector(path),columns=["CIF_Name","sym", "struct"])
     my_df=pd.DataFrame(predicted_collector(path),columns=["CIF_Name","Neigh_Order", "sym", "struct"])
     sm = StructureMatcher()
+    
+    print("StructureMatcher Activated.")
 
     unique_list_sym=[]
     unique_list_struc=[]
@@ -204,24 +204,23 @@ def compare_structures(formula,path):
                 break
         unique_list_sym.append(is_sym_unique)
         unique_list_struc.append(is_struc_unique)
-    my_df["is_new_sym"]=unique_list_sym
-    my_df["is_new_struc"]=unique_list_struc
+    my_df["is_sym_new"]=unique_list_sym
+    my_df["is_struc_new"]=unique_list_struc
 
     print("New structures are successfully detected!!")
     my_df.drop(["struct"],axis=1,inplace=True)
-    dest_path=os.path.join(path,"Calc_report")
-    my_df_new=my_df[(my_df["is_new_struc"]==True)].copy()
-    my_df_new.drop(["is_new_struc"],axis=1,inplace=True)
+    my_df_new=my_df[(my_df["is_struc_new"]==True)].copy()
+    my_df_new.drop(["is_struc_new"],axis=1,inplace=True)
     return my_df,my_df_new
 
 def matcher(formula,path,struc_df,new_struc_df):
+
     dest_path=os.path.join(path,"Calc_report")
     if not os.path.exists(dest_path):
         os.makedirs(dest_path)
-        struc_df.to_csv(os.path.join(dest_path,"Similarity_Report.csv"),index=False)
-        new_struc_df.to_csv(os.path.join(dest_path,"New_Structures.csv"),index=False)
+        struc_df.to_csv(os.path.join(dest_path,formula+"_all_OnlyNew.csv"),index=False)
+        new_struc_df.to_csv(os.path.join(dest_path,formula+"_all_OnlyNew.csv"),index=False)
     else:
-        struc_df.to_csv(os.path.join(dest_path,"Similarity_Report.csv"),index=False)
         folder_list = [name for name in os.listdir(dest_path) if os.path.isdir(os.path.join(dest_path, name))]
         for folder in folder_list:
             csv_path=os.path.join(dest_path,folder)
@@ -244,25 +243,106 @@ def matcher(formula,path,struc_df,new_struc_df):
                 on=common_cols,
                 how="left"
             )
-
+            GNN_path=os.path.join(dest_path,folder,"CheckNew_report")
+            if not os.path.exists(GNN_path):
+                os.makedirs(GNN_path)
             new_struc_df=new_struc_df.sort_values(by="Energy")
-            new_struc_df.to_csv(os.path.join(dest_path,folder,folder+"_"+formula+"_all_OnlyNew.csv"),index=False)
+            new_struc_df.to_csv(os.path.join(GNN_path,folder+"_"+formula+"_all_OnlyNew.csv"),index=False)
 
             new_struc_df=new_struc_df.drop_duplicates(subset=["sym"])
-            new_struc_df.to_csv(os.path.join(dest_path,folder,folder+"_"+formula+"_best_OnlyNew.csv"),index=False)
+            new_struc_df.to_csv(os.path.join(GNN_path,folder+"_"+formula+"_best_OnlyNew.csv"),index=False)
 
             struc_df=struc_df.sort_values(by="Energy")
-            struc_df.to_csv(os.path.join(dest_path,folder,folder+"_"+formula+"_all.csv"),index=False)
+            struc_df.to_csv(os.path.join(GNN_path,folder+"_"+formula+"_all.csv"),index=False)
 
             struc_df=struc_df.drop_duplicates(subset=["sym"])
-            struc_df.to_csv(os.path.join(dest_path,folder,folder+"_"+formula+"_best.csv"),index=False)
+            struc_df.to_csv(os.path.join(GNN_path,folder+"_"+formula+"_best.csv"),index=False)
 
+def copy_best_data(path,tag,top_n):
+
+    dest_path=os.path.join(path,"Calc_report")
+    if not os.path.exists(dest_path):
+        print("Warning: GNN evaluation is missing. Run again with following flags: -calc [MACE, M3GNet, ALIGNN, ensemble] --CheckNew!")
+        exit(0)
+    folder_list = [name for name in os.listdir(dest_path) if os.path.isdir(os.path.join(dest_path, name))]
+    if len(folder_list)==0:
+        print("Warning: GNN evaluation is missing. Run again with following flags: -calc [MACE, M3GNet, ALIGNN, ensemble] --CheckNew!")
+        exit(0)        
+    for folder in folder_list:
+        
+        csv_path=os.path.join(dest_path,folder,"CheckNew_report")
+        if not os.path.exists(csv_path):
+            print("Warning: StructureMatcher evaluation is missing. Run again with the flag --CheckNew!")
+            exit(0)
+
+        csv_list=os.listdir(csv_path)
+        for csv_file in csv_list:
+            if tag in csv_file:
+                best_csv_path = os.path.join(csv_path,csv_file)
+                df_toCopy=pd.read_csv(best_csv_path)
+                df_toCopy=df_toCopy[df_toCopy["Energy"]<0]
+                if(len(df_toCopy)==0):
+                    print("Warning: No data in csv file!!!")
+                    exit(0)  
+
+        print("Files are transferring.")
+
+        best_path=os.path.join(csv_path,"Best_Structures")      
+        if not os.path.exists(best_path):
+            os.makedirs(best_path)     
+
+        ind=0
+        if(top_n=="all"):
+            top_n=len(df_toCopy)
+        for i, my_row in df_toCopy.iterrows():
+            if(ind>=top_n):
+                break
+
+            if(my_row["is_sym_new"]==True):
+                is_sym_new="T"
+            else:
+                is_sym_new="F"
+
+            if "is_struc_new" in my_row:
+                if(my_row["is_struc_new"]==True):
+                    is_struc_new="T"
+                else:
+                    is_struc_new="F"
+            else:
+                is_struc_new="T"
+
+            cif_path=os.path.join(path,my_row["Neigh_Order"],"sym"+str(my_row["sym"]),my_row["CIF_Name"]+".cif")
+            dest_path=os.path.join(best_path,my_row["CIF_Name"]+"_"+is_sym_new+"_"+is_struc_new+".cif")
+            
+
+            from pymatgen.core import Structure, Lattice
+            from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
+            from pymatgen.io.cif import CifWriter
+
+            struc=Structure.from_file(cif_path)
+            # struc_sga = SpacegroupAnalyzer(struc, symprec=1e-1)
+            # struc_refined=struc_sga.get_refined_structure()
+            # struc_conv = struc_sga.get_conventional_standard_structure()
+            # print(struc_sga.get_space_group_number())
+
+            # writer = CifWriter(struc_refined, symprec=1e-2, angle_tolerance=5, refine_struct=True)
+            writer = CifWriter(struc, symprec=1e-2, angle_tolerance=5, refine_struct=True)
+
+            writer.write_file(dest_path)
+            # shutil.copy(cif_path,dest_path)
+            ind+=1
+    print("Files are successfully transferred!")
 
 def find_unique_data(formula,path):
+
+    if not os.path.exists(path):
+        print("Warning: Structure files are missing! Activate prototype search!")
+        exit(0)
 
     get_OQMD_data(formula,path)
     get_MP_data(formula,path)
     struc_df,new_struc_df=compare_structures(formula,path)
     matcher(formula,path,struc_df,new_struc_df)
+
 
     
