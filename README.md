@@ -63,7 +63,7 @@ This program is based on Python 3 under Anaconda.
 - `-ts`, `--time_sleep`  
   Sets sleep time between queries for online search in OQMD.  
   Excessive number of queries may cause the server to halt.  
-  **Default:** `"none"`.
+  **Default:** `none`.
 
 - `--BlockSearch`  
   Blocks the search stage.  
@@ -72,16 +72,16 @@ This program is based on Python 3 under Anaconda.
 - `--Relax`  
   Performs structure relaxation before ML evaluation.
 
-- `--CheckNew`
-Check if found structures have been already reported in OQMD and MP.
+- `--CheckNew`  
+  Check if found structures have been already reported in OQMD and MP.
 
-- `-top_n`, `--top_n_new`
-Copies the top-n evaluated new structures, ranked by the GNN evaluation, to the Best_Structures folder if available [int, "all", "none"]. (default: none).
-Use this option together with --CheckNew, or in a subsequent run after a run performed with --CheckNew.
+- `-top_n`, `--top_n_new`  
+  Copies the top-n evaluated new structures, ranked by the GNN evaluation, to the Best_Structures folder if available [`int`, `all`, `none`]. (default: `none`).
+  Use this option together with `--CheckNew`, or in a subsequent run after a run performed with `--CheckNew`.
 
-- `-top_c`, `--top_n_calc`
-Copies the top-n evaluated structures, ranked by the GNN evaluation, to the Best_Structures folder if available [int, "all", "none"].(default: none). 
-Use this option together with --CheckNew, or in a subsequent run after a run performed with --CheckNew.
+- `-top_c`, `--top_n_calc`  
+  Copies the top-n evaluated structures, ranked by the GNN evaluation, to the Best_Structures folder if available [`int`, `all`, `none`].(default: `none`). 
+  Use this option together with `--CheckNew`, or in a subsequent run after a run performed with `--CheckNew`.
 
 
 
