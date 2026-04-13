@@ -53,14 +53,14 @@ This program is based on Python 3 under Anaconda.
   Sets output directory. Provide the full path.  
   **Default:** current directory.
 
-- `-o`, `--online`  
+- `-on`, `--online`  
   Enables online (`True`) or offline (`False`) search in OQMD.  
   **Default:** `False`.
 
   For offline search, download and set up the offline OQMD database:  
   https://oqmd.org/download/
 
-- `-t`, `--time_sleep`  
+- `-ts`, `--time_sleep`  
   Sets sleep time between queries for online search in OQMD.  
   Excessive number of queries may cause the server to halt.  
   **Default:** `"none"`.
@@ -71,6 +71,14 @@ This program is based on Python 3 under Anaconda.
 
 - `--Relax`  
   Performs structure relaxation before ML evaluation.
+- `--CheckNew`
+   Check if found structures have been already reported in OQMD and MP.
+- `-top_n`, `--top_n_new`
+  Copies the top-n evaluated new structures, ranked by the GNN evaluation, to the Best_Structures folder if available [int, "all", "none"]. (default: none).
+  Use this option together with --CheckNew, or in a subsequent run after a run performed with --CheckNew.
+- `-top_c`, `--top_n_calc`
+  Copies the top-n evaluated structures, ranked by the GNN evaluation, to the Best_Structures folder if available [int, "all", "none"].(default: none). 
+  Use this option together with --CheckNew, or in a subsequent run after a run performed with --CheckNew.
 
 
 
