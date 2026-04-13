@@ -213,14 +213,14 @@ def categorize(N_neig,formula,data_path):
 
         dest = shutil.move(source_path, dest_path)  
 
-def show_config(formula,N_neig,E_filter,timer,online,calculator,database,BlockSearch,Relaxer,data_path,CheckNew):
+def show_config(formula,N_neig,E_filter,timer,online,calculator,database,BlockSearch,Relaxer,data_path,CheckNew,top_n,top_c):
     print("\nProgram Configuration")
     print("---------------------")
     print("Query formula:\t",formula,"\nNeighbor order:\t",N_neig,
           "\nEnergy filter:\t",E_filter,"\nSleep timer:\t",timer,
           "\nOnline: \t",online,"\nCalculator: \t",calculator,"\nData source: \t",database,
           "\nBlockSearch: \t",BlockSearch,"\nRelaxer: \t",Relaxer,
-          "\nOutputDir: \t",data_path,"\nCheckNew: \t",CheckNew)
+          "\nOutputDir: \t",data_path,"\nCheckNew: \t",CheckNew,"\nTop n: \t",top_n,"\nTop c: \t",top_c)
     print("---------------------\n")
 
 def main():
@@ -228,14 +228,16 @@ def main():
     parser.add_argument('formula')
     parser.add_argument('-n','--neighbor',default=1,help="Order of neighbors to be considered in the similarity search. (default: 1)")
     parser.add_argument('-f','--filter',default=0,help="Selected neighbors are limited to those below the energy filter value. (default: 0) unit: [eV/atom]. Use \"none\" for no filter.") 
-    parser.add_argument('-t','--time_sleep',default="none",help="Set sleep time between queries. Excessive number of queries may cause the server to halt.(default: \"none\")")
-    parser.add_argument('-o','--online',default="False",help="Sets online (True) or offline (False) search in OQMD (default: False). For offline seach, you should download and set up offline OQMD database. See https://oqmd.org/download/.")
-    parser.add_argument('-calc','--calculator',default="None",help="Sets calculator [M3GNet, ALIGNN, MACE, ensemble]. Calculators are applied to all available neighbors. (default: None).")
+    parser.add_argument('-ts','--time_sleep',default="none",help="Set sleep time between queries. Excessive number of queries may cause the server to halt.(default: \"none\")")
+    parser.add_argument('-on','--online',default="False",help="Sets online (True) or offline (False) search in OQMD (default: False). For offline seach, you should download and set up offline OQMD database. See https://oqmd.org/download/.")
+    parser.add_argument('-calc','--calculator',default="none",help="Sets calculator [M3GNet, ALIGNN, MACE, ensemble]. Calculators are applied to all available neighbors. (default: none).")
     parser.add_argument('-out','--output_dir',default=".",help="Sets output directory. Enter full path. (default: current directory).")
     parser.add_argument('--BlockSearch',help="Blocks search. In case you want to use only calculator but not search feature, use this flag.",action='store_true')
     parser.add_argument('--Relax',help="Sets Structure relaxation before ML evaluation.",action='store_true')
     parser.add_argument('-db','--database',default="OQMD",help="Sets data source [OQMD, MP, MPDS]. (default: OQMD).")
     parser.add_argument('--CheckNew',help="Check if found structures have been already reported in OQMD and MP.",action='store_true')
+    parser.add_argument('-top_n','--top_n_new',default="none",help="Copies the top-n evaluated new structures, ranked by the GNN evaluation, to the Best_Structures folder if available [int, \"all\", \"none\"]. (default: none). Use this option together with --CheckNew, or in a subsequent run after a run performed with --CheckNew. ")
+    parser.add_argument('-top_c','--top_n_calc',default="none",help="Copies the top-n evaluated structures, ranked by the GNN evaluation, to the Best_Structures folder if available [int, \"all\", \"none\"]. (default: none). Use this option together with --CheckNew, or in a subsequent run after a run performed with --CheckNew. ")
 
     args = parser.parse_args()
 
@@ -264,14 +266,19 @@ def main():
     else:
         data_path=args.output_dir
 
-    show_config(formula=formula,N_neig=N_neig,E_filter=E_filter,timer=time_sleep,online=online,calculator=calculator,database=database,BlockSearch=BlockSearch,Relaxer=Relax,data_path=data_path,CheckNew=CheckNew)
-    path=data_path+"/output_"+formula+"/"
+    if((args.top_n_new=="none") or (args.top_n_new=="all")):
+        top_n=args.top_n_new
+    else:
+        top_n=int(args.top_n_new)
     
-    if(CheckNew==True):
-        from db import DBsearch
-        DBsearch.find_unique_data(formula,path)
-        exit(0)
+    if((args.top_n_calc=="none") or (args.top_n_calc=="all")):
+        top_c=args.top_n_calc
+    else:
+        top_c=int(args.top_n_calc)
 
+    show_config(formula=formula,N_neig=N_neig,E_filter=E_filter,timer=time_sleep,online=online,calculator=calculator,database=database,BlockSearch=BlockSearch,Relaxer=Relax,data_path=data_path,CheckNew=CheckNew,top_n=top_n,top_c=top_c)
+    path=data_path+"/output_"+formula+"/"
+        
     if(BlockSearch!=True):
         res,neigh_list,exchange_dict=get_Neig(formula=formula,N_neig=N_neig)
 
@@ -294,7 +301,6 @@ def main():
             
         print("TERMINATED SUCCESFULLY!\n")
         categorize(N_neig=N_neig,formula=formula,data_path=data_path)
-
     
     if(calculator=="M3GNet"):
         # ML.M3GNet_calc("./","./output_"+formula+"/Calc_report/")
@@ -337,6 +343,29 @@ def main():
             ML.ensemble_vote(formula,path_alignn,path_mace,path_m3gnet,path_results,N_model)
     else:
         pass
+
+    if(CheckNew==True):
+        from db import DBsearch
+        DBsearch.find_unique_data(formula,path)
+        if(top_n!="none"):
+            tag="best_OnlyNew.csv"
+            DBsearch.copy_best_data(path,tag,top_n)
+        elif(top_c!="none"):
+            tag="best.csv"
+            DBsearch.copy_best_data(path,tag,top_c)
+        else:
+            pass
+    else:
+        if(top_n!="none"):
+            from db import DBsearch
+            tag="best_OnlyNew.csv"
+            DBsearch.copy_best_data(path,tag,top_n)
+        elif(top_c!="none"):
+            from db import DBsearch
+            tag="best.csv"
+            DBsearch.copy_best_data(path,tag,top_c)
+        else:
+            pass
 
 if __name__=='__main__':
     main()
