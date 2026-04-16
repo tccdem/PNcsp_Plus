@@ -238,6 +238,7 @@ def main():
     parser.add_argument('--CheckNew',help="Check if found structures have been already reported in OQMD and MP.",action='store_true')
     parser.add_argument('-top_n','--top_n_new',default="none",help="Copies the top-n evaluated new structures, ranked by the GNN evaluation, to the Best_Structures folder if available [int, \"all\", \"none\"]. (default: none). Use this option together with --CheckNew, or in a subsequent run after a run performed with --CheckNew. ")
     parser.add_argument('-top_c','--top_n_calc',default="none",help="Copies the top-n evaluated structures, ranked by the GNN evaluation, to the Best_Structures folder if available [int, \"all\", \"none\"]. (default: none). Use this option together with --CheckNew, or in a subsequent run after a run performed with --CheckNew. ")
+    parser.add_argument('--ReduceData',help="Removes duplicates.",action='store_true')
 
     args = parser.parse_args()
 
@@ -248,6 +249,7 @@ def main():
     calculator=args.calculator
     database=args.database
     BlockSearch=args.BlockSearch
+    ReduceData=args.ReduceData
     CheckNew=args.CheckNew
     Relax=args.Relax
     
@@ -278,6 +280,16 @@ def main():
 
     show_config(formula=formula,N_neig=N_neig,E_filter=E_filter,timer=time_sleep,online=online,calculator=calculator,database=database,BlockSearch=BlockSearch,Relaxer=Relax,data_path=data_path,CheckNew=CheckNew,top_n=top_n,top_c=top_c)
     path=data_path+"/output_"+formula+"/"
+
+    if(ReduceData==True): 
+        from db import Tools
+        import pandas as pd
+        my_df=Tools.data_reduction(path,"MACE")
+        my_df.drop(["struct"],axis=1,inplace=True)
+        my_df = my_df[my_df["duplicate_of"].isna()]
+        dest_path=os.path.join(path,"Calc_report/MACE", "MACE_"+formula+"_all_reduced.csv")
+        my_df.to_csv(dest_path)
+        exit(0)
         
     if(BlockSearch!=True):
         res,neigh_list,exchange_dict=get_Neig(formula=formula,N_neig=N_neig)
@@ -343,6 +355,8 @@ def main():
             ML.ensemble_vote(formula,path_alignn,path_mace,path_m3gnet,path_results,N_model)
     else:
         pass
+
+
 
     if(CheckNew==True):
         from db import DBsearch

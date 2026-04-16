@@ -26,9 +26,9 @@ def get_OQMD_data(formula,path):
     import shutil
     import qmpy
 
-    def write_CIF(elem_list, dest_path, formula,spacegroup_num, ind_ext):
+    def write_CIF(elem_list, dest_path, formula,spacegroup_num, ind_ext, energy):
         struct = crystal(elem_list, site_list, cell=cell, size=(1, 1, 1))
-        filename = f"{dest_path}{formula}_sym{spacegroup_num}_OQMD_{ind_ext+1}.cif"
+        filename = f"{dest_path}{formula}_sym{spacegroup_num}_OQMD_{ind_ext+1}_{energy}.cif"
         write(filename, struct)
 
     def reduce_list(nums):
@@ -65,6 +65,12 @@ def get_OQMD_data(formula,path):
         spacegroup_num = entry['spacegroup'].number
         cell = entry['cell']
         sites = entry['sites']
+        delta_e = entry['delta_e']
+
+        if(delta_e>=0):
+            energy="pos"
+        else:
+            energy="neg"
 
         # Collect element list and site list
         site_list, elem_list, elem_list_org = [], [], []
@@ -73,7 +79,7 @@ def get_OQMD_data(formula,path):
             site_list.append(tuple(coords.split()))
             elem_list.append(elem)      
 
-        write_CIF(elem_list, dest_path, formula,spacegroup_num, ind_ext)
+        write_CIF(elem_list, dest_path, formula,spacegroup_num, ind_ext,energy)
 
     print("OQMD data is collected!")
     return target_data
@@ -81,8 +87,8 @@ def get_OQMD_data(formula,path):
 def get_MP_data(formula,path):
     from mp_api.client import MPRester
 
-    def write_CIF(struct, dest_path, formula,spacegroup_num, ind_ext):
-        filename = f"{dest_path}{formula}_sym{spacegroup_num}_MP_{ind_ext+1}.cif"
+    def write_CIF(struct, dest_path, formula,spacegroup_num, ind_ext,energy):
+        filename = f"{dest_path}{formula}_sym{spacegroup_num}_MP_{ind_ext+1}_{energy}.cif"
         # write(filename, struct)
         struct.to(fmt="cif", filename=filename)
 
@@ -113,8 +119,13 @@ def get_MP_data(formula,path):
         structure = entry.structure
         # spacegroup_sym = entry.symmetry.symbol
         spacegroup_num = entry.symmetry.number
+        delta_e = entry.formation_energy_per_atom
 
-        write_CIF(structure, dest_path, formula,spacegroup_num, ind_ext)
+        if(delta_e>=0):
+            energy="pos"
+        else:
+            energy="neg"
+        write_CIF(structure, dest_path, formula,spacegroup_num, ind_ext,energy)
     
     print("MP data is collected!")
     return target_data
@@ -123,6 +134,7 @@ def compare_structures(formula,path):
 
     from pymatgen.analysis.structure_matcher import StructureMatcher
     from pymatgen.core import Structure
+    from . import Tools
 
     def ref_collector(path):
         structure_ref = []
@@ -139,61 +151,96 @@ def compare_structures(formula,path):
         return structure_ref
     
 
-    def predicted_collector(path):
-        struct_list_init = []
+    # def predicted_collector(path):
+    #     struct_list_init = []
 
-        neigh_list = [x for x in os.listdir(path) if "Neigh" in x]
-        if not neigh_list:
-            return struct_list_init
+    #     neigh_list = [x for x in os.listdir(path) if "Neigh" in x]
+    #     if not neigh_list:
+    #         return struct_list_init
 
-        for neigh in neigh_list:
-            neigh_path = os.path.join(path, neigh)
-            if not os.path.isdir(neigh_path):
-                continue
+    #     for neigh in neigh_list:
+    #         neigh_path = os.path.join(path, neigh)
+    #         if not os.path.isdir(neigh_path):
+    #             continue
 
-            sym_list = os.listdir(neigh_path)
-            if not sym_list:
-                continue
+    #         sym_list = os.listdir(neigh_path)
+    #         if not sym_list:
+    #             continue
 
-            for sym in sym_list:
-                sym_path = os.path.join(neigh_path, sym)
-                if not os.path.isdir(sym_path):
-                    continue
+    #         for sym in sym_list:
+    #             sym_path = os.path.join(neigh_path, sym)
+    #             if not os.path.isdir(sym_path):
+    #                 continue
 
-                proto_list = os.listdir(sym_path)
-                if not proto_list:
-                    continue
+    #             proto_list = os.listdir(sym_path)
+    #             if not proto_list:
+    #                 continue
 
-                for struct_name in proto_list:
-                    target_path = os.path.join(sym_path, struct_name)
+    #             for struct_name in proto_list:
+    #                 target_path = os.path.join(sym_path, struct_name)
 
-                    if not os.path.isfile(target_path):
-                        continue
+    #                 if not os.path.isfile(target_path):
+    #                     continue
 
 
-                    try:
-                        struct = Structure.from_file(target_path)
-                        struct_list_init.append([struct_name.replace(".cif",""),neigh,int(sym.replace("sym","")), struct])
-                    except Exception as e:
-                        print(f"Could not read {target_path}: {e}")
+    #                 try:
+    #                     struct = Structure.from_file(target_path)
+    #                     struct_list_init.append([struct_name.replace(".cif",""),neigh,int(sym.replace("sym","")), struct])
+    #                 except Exception as e:
+    #                     print(f"Could not read {target_path}: {e}")
 
-        return struct_list_init
+    #     return struct_list_init
     
     ref_df=pd.DataFrame(ref_collector(path),columns=["CIF_Name","sym", "struct"])
-    my_df=pd.DataFrame(predicted_collector(path),columns=["CIF_Name","Neigh_Order", "sym", "struct"])
+    my_df=Tools.structure_collector(path)
+    # my_df=Tools.data_reduction(path)
+    # my_df=pd.DataFrame(predicted_collector(path),columns=["CIF_Name","Neigh_Order", "sym", "struct"])
     sm = StructureMatcher()
+
+    # def find_unique_in(my_df):
+    #     sm = StructureMatcher()
+    #     all_rows = []
+    #     for sym, group in my_df.groupby("sym"):
+    #         group = group.sort_values(by="Neigh_Order", ascending=False).reset_index(drop=True)
+    #         representatives = []
+    #         duplicate_of = []
+    #         for i, row in group.iterrows():
+    #             current_struct = row["struct"]
+
+    #             matched = False
+    #             matched_rep_index = None
+
+    #             for rep_idx, rep_struct in representatives:
+    #                 if sm.fit(current_struct, rep_struct):
+    #                     matched = True
+    #                     matched_rep_index = rep_idx
+    #                     break
+
+    #             if matched:
+    #                 duplicate_of.append(matched_rep_index)
+    #             else:
+    #                 representatives.append((i, current_struct))
+    #                 duplicate_of.append(None)
+    #         group["duplicate_of"] = duplicate_of
+    #         group["is_unique"] = group["duplicate_of"].isna()
+        
+    #         all_rows.append(group)
+    #     return pd.concat(all_rows, ignore_index=True)
+
+    # my_df=find_unique_in(my_df)
     
     print("StructureMatcher Activated.")
 
     unique_list_sym=[]
     unique_list_struc=[]
+    similar_to_list=[]
 
-    ref_df["sym"]
     sym_ref_list=list(set(ref_df["sym"].astype(int).values))
     for i, my_row in my_df.iterrows():
         my_struct = my_row["struct"]
         is_struc_unique=True
         is_sym_unique=True
+        similar_to="none"
         if(my_row["sym"] in sym_ref_list):
             is_sym_unique=False
 
@@ -201,16 +248,20 @@ def compare_structures(formula,path):
             ref_struct = ref_row["struct"]
             if sm.fit(my_struct, ref_struct):
                 is_struc_unique=False
+                similar_to=ref_row["CIF_Name"]
                 break
         unique_list_sym.append(is_sym_unique)
         unique_list_struc.append(is_struc_unique)
+        similar_to_list.append(similar_to)
     my_df["is_sym_new"]=unique_list_sym
     my_df["is_struc_new"]=unique_list_struc
+    my_df["similar_to"]=similar_to_list
 
     print("New structures are successfully detected!!")
     my_df.drop(["struct"],axis=1,inplace=True)
     my_df_new=my_df[(my_df["is_struc_new"]==True)].copy()
     my_df_new.drop(["is_struc_new"],axis=1,inplace=True)
+    my_df_new.drop(["similar_to"],axis=1,inplace=True)
     return my_df,my_df_new
 
 def matcher(formula,path,struc_df,new_struc_df):
@@ -339,8 +390,8 @@ def find_unique_data(formula,path):
         print("Warning: Structure files are missing! Activate prototype search!")
         exit(0)
 
-    get_OQMD_data(formula,path)
-    get_MP_data(formula,path)
+    # get_OQMD_data(formula,path)
+    # get_MP_data(formula,path)
     struc_df,new_struc_df=compare_structures(formula,path)
     matcher(formula,path,struc_df,new_struc_df)
 
