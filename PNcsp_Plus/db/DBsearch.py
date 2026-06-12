@@ -276,41 +276,94 @@ def matcher(formula,path,struc_df,new_struc_df):
         for folder in folder_list:
             csv_path=os.path.join(dest_path,folder)
             csv_list=os.listdir(csv_path)
+
+            is_reduced=False
             for csv_file in csv_list:
-                if "_all" in csv_file:
-                    GNN_df=pd.read_csv(os.path.join(csv_path,csv_file))
-                
-            common_cols = [col for col in new_struc_df.columns if col in GNN_df.columns]
-            extra_cols = [col for col in GNN_df.columns if col not in new_struc_df.columns]
+                if("reduced" in csv_file):
+                    is_reduced=True
+                    break
+            if(is_reduced==True):
+                for csv_file in csv_list:
+                    if "_all_reduced" in csv_file:
+                        GNN_df=pd.read_csv(os.path.join(csv_path,csv_file))
+                    
+                common_cols = [col for col in new_struc_df.columns if col in GNN_df.columns]
+                extra_cols = [col for col in GNN_df.columns if col not in new_struc_df.columns]
 
-            new_struc_df = new_struc_df.merge(
-                GNN_df[common_cols + extra_cols].drop_duplicates(subset=common_cols),
-                on=common_cols,
-                how="left"
-            )
+                new_struc_df = new_struc_df.merge(
+                    GNN_df[common_cols + extra_cols].drop_duplicates(subset=common_cols),
+                    on=common_cols,
+                    how="left"
+                )
 
-            struc_df = struc_df.merge(
-                GNN_df[common_cols + extra_cols].drop_duplicates(subset=common_cols),
-                on=common_cols,
-                how="left"
-            )
-            GNN_path=os.path.join(dest_path,folder,"CheckNew_report")
-            if not os.path.exists(GNN_path):
-                os.makedirs(GNN_path)
-            new_struc_df=new_struc_df.sort_values(by="Energy")
-            new_struc_df.to_csv(os.path.join(GNN_path,folder+"_"+formula+"_all_OnlyNew.csv"),index=False)
+                struc_df = struc_df.merge(
+                    GNN_df[common_cols + extra_cols].drop_duplicates(subset=common_cols),
+                    on=common_cols,
+                    how="left"
+                )
+                GNN_path=os.path.join(dest_path,folder,"CheckNew_report")
+                if not os.path.exists(GNN_path):
+                    os.makedirs(GNN_path)
 
-            new_struc_df=new_struc_df.drop_duplicates(subset=["sym"])
-            new_struc_df.to_csv(os.path.join(GNN_path,folder+"_"+formula+"_best_OnlyNew.csv"),index=False)
+                new_struc_df = new_struc_df.dropna(subset=["Energy"])
 
-            struc_df=struc_df.sort_values(by="Energy")
-            struc_df.to_csv(os.path.join(GNN_path,folder+"_"+formula+"_all.csv"),index=False)
+                new_struc_df=new_struc_df.sort_values(by="Energy")
+                new_struc_df.to_csv(os.path.join(GNN_path,folder+"_"+formula+"_all_OnlyNew.csv"),index=False)
 
-            struc_df=struc_df.drop_duplicates(subset=["sym"])
-            struc_df.to_csv(os.path.join(GNN_path,folder+"_"+formula+"_best.csv"),index=False)
+                new_struc_df=new_struc_df.drop_duplicates(subset=["sym"])
+                new_struc_df.to_csv(os.path.join(GNN_path,folder+"_"+formula+"_best_OnlyNew.csv"),index=False)
+
+                struc_df = struc_df.dropna(subset=["Energy"])
+
+                struc_df=struc_df.sort_values(by="Energy")
+                struc_df.to_csv(os.path.join(GNN_path,folder+"_"+formula+"_all.csv"),index=False)
+
+                struc_df=struc_df.drop_duplicates(subset=["sym"])
+                struc_df.to_csv(os.path.join(GNN_path,folder+"_"+formula+"_best.csv"),index=False)
+            else:
+                for csv_file in csv_list:
+                    if "_all" in csv_file:
+                        GNN_df=pd.read_csv(os.path.join(csv_path,csv_file))
+                    
+                common_cols = [col for col in new_struc_df.columns if col in GNN_df.columns]
+                extra_cols = [col for col in GNN_df.columns if col not in new_struc_df.columns]
+
+                new_struc_df = new_struc_df.merge(
+                    GNN_df[common_cols + extra_cols].drop_duplicates(subset=common_cols),
+                    on=common_cols,
+                    how="left"
+                )
+
+                struc_df = struc_df.merge(
+                    GNN_df[common_cols + extra_cols].drop_duplicates(subset=common_cols),
+                    on=common_cols,
+                    how="left"
+                )
+                GNN_path=os.path.join(dest_path,folder,"CheckNew_report")
+                if not os.path.exists(GNN_path):
+                    os.makedirs(GNN_path)
+
+                new_struc_df = new_struc_df.dropna(subset=["Energy"])
+                # new_struc_df = new_struc_df[~new_struc_df["Energy"].isna()]
+                # new_struc_df["Energy"] = pd.to_numeric(new_struc_df["Energy"], errors="coerce")
+                # new_struc_df = new_struc_df.dropna(subset=["Energy"])
+
+                new_struc_df=new_struc_df.sort_values(by="Energy")
+                new_struc_df.to_csv(os.path.join(GNN_path,folder+"_"+formula+"_all_OnlyNew.csv"),index=False)
+
+                new_struc_df=new_struc_df.drop_duplicates(subset=["sym"])
+                new_struc_df.to_csv(os.path.join(GNN_path,folder+"_"+formula+"_best_OnlyNew.csv"),index=False)
+
+                struc_df = struc_df.dropna(subset=["Energy"])
+
+                struc_df=struc_df.sort_values(by="Energy")
+                struc_df.to_csv(os.path.join(GNN_path,folder+"_"+formula+"_all.csv"),index=False)
+
+                struc_df=struc_df.drop_duplicates(subset=["sym"])
+                struc_df.to_csv(os.path.join(GNN_path,folder+"_"+formula+"_best.csv"),index=False)
 
 def copy_best_data(path,tag,top_n):
-
+    import shutil
     dest_path=os.path.join(path,"Calc_report")
     if not os.path.exists(dest_path):
         print("Warning: GNN evaluation is missing. Run again with following flags: -calc [MACE, M3GNet, ALIGNN, ensemble] --CheckNew!")
@@ -340,7 +393,11 @@ def copy_best_data(path,tag,top_n):
 
         best_path=os.path.join(csv_path,"Best_Structures")      
         if not os.path.exists(best_path):
-            os.makedirs(best_path)     
+            os.makedirs(best_path)  
+        else:
+            shutil.rmtree(best_path)
+            os.makedirs(best_path)
+   
 
         ind=0
         if(top_n=="all"):
@@ -364,7 +421,7 @@ def copy_best_data(path,tag,top_n):
 
             cif_path=os.path.join(path,my_row["Neigh_Order"],"sym"+str(my_row["sym"]),my_row["CIF_Name"]+".cif")
             dest_path=os.path.join(best_path,my_row["CIF_Name"]+"_"+is_sym_new+"_"+is_struc_new+".cif")
-            
+            # dest_path="/home/cem/PNcsp_Plus/PNcsp_Plus/dev/CSPBench_data/Best_structures/"+my_row["CIF_Name"]+"_"+is_sym_new+"_"+is_struc_new+".cif"
 
             from pymatgen.core import Structure, Lattice
             from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
@@ -377,10 +434,27 @@ def copy_best_data(path,tag,top_n):
             # print(struc_sga.get_space_group_number())
 
             # writer = CifWriter(struc_refined, symprec=1e-2, angle_tolerance=5, refine_struct=True)
+            sga = SpacegroupAnalyzer(struc, symprec=1e-2, angle_tolerance=5)
+            sym_num=sga.get_space_group_number()
             writer = CifWriter(struc, symprec=1e-2, angle_tolerance=5, refine_struct=True)
 
             writer.write_file(dest_path)
-            # shutil.copy(cif_path,dest_path)
+
+            with open(dest_path, "r") as f:
+
+                text = f.read() 
+                f.seek(0)
+                for line in f:
+                    # print(line.strip())
+                    if "_symmetry_space_group_name_H-M" in line:
+                        line_remain=line.replace("_symmetry_space_group_name_H-M   ","")
+                        if "_" in line_remain:
+                            line_remain_new=line_remain.replace("_","")
+                            text = text.replace(line_remain,line_remain_new)
+                    # if "_symmetry_Int_Tables_number" in line:
+                    #     text = text.replace("_symmetry_Int_Tables_number","_space_group_IT_number")
+            with open(dest_path, "w") as f:
+                f.write(text)
             ind+=1
     print("Files are successfully transferred!")
 
@@ -390,8 +464,8 @@ def find_unique_data(formula,path):
         print("Warning: Structure files are missing! Activate prototype search!")
         exit(0)
 
-    # get_OQMD_data(formula,path)
-    # get_MP_data(formula,path)
+    get_OQMD_data(formula,path)
+    get_MP_data(formula,path)
     struc_df,new_struc_df=compare_structures(formula,path)
     matcher(formula,path,struc_df,new_struc_df)
 

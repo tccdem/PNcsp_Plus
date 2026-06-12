@@ -236,6 +236,8 @@ def main():
     parser.add_argument('--Relax',help="Sets Structure relaxation before ML evaluation.",action='store_true')
     parser.add_argument('-db','--database',default="OQMD",help="Sets data source [OQMD, MP, MPDS]. (default: OQMD).")
     parser.add_argument('--CheckNew',help="Check if found structures have been already reported in OQMD and MP.",action='store_true')
+    # parser.add_argument('-top_n','--top_n_new',nargs=2,default=["none","none"],help="Copies the top-n evaluated new structures, ranked by the GNN evaluation, to the Best_Structures folder if available. Enter 2 input [first:[\"none\",\"full\",\"best\"], second:[int, \"all\", \"none\"]]. (default: [none,none]). Use this option together with --CheckNew, or in a subsequent run after a run performed with --CheckNew. ")
+    # parser.add_argument('-top_c','--top_c_new',nargs=2,default=["none","none"],help="Copies the top-n evaluated new structures, ranked by the GNN evaluation, to the Best_Structures folder if available. Enter 2 input [first:[\"none\",\"full\",\"best\"], second:[int, \"all\", \"none\"]]. (default: [none,none]). Use this option together with --CheckNew, or in a subsequent run after a run performed with --CheckNew. ")
     parser.add_argument('-top_n','--top_n_new',default="none",help="Copies the top-n evaluated new structures, ranked by the GNN evaluation, to the Best_Structures folder if available [int, \"all\", \"none\"]. (default: none). Use this option together with --CheckNew, or in a subsequent run after a run performed with --CheckNew. ")
     parser.add_argument('-top_c','--top_n_calc',default="none",help="Copies the top-n evaluated structures, ranked by the GNN evaluation, to the Best_Structures folder if available [int, \"all\", \"none\"]. (default: none). Use this option together with --CheckNew, or in a subsequent run after a run performed with --CheckNew. ")
     parser.add_argument('--ReduceData',help="Removes duplicates.",action='store_true')
@@ -281,15 +283,15 @@ def main():
     show_config(formula=formula,N_neig=N_neig,E_filter=E_filter,timer=time_sleep,online=online,calculator=calculator,database=database,BlockSearch=BlockSearch,Relaxer=Relax,data_path=data_path,CheckNew=CheckNew,top_n=top_n,top_c=top_c)
     path=data_path+"/output_"+formula+"/"
 
-    if(ReduceData==True): 
-        from db import Tools
-        import pandas as pd
-        my_df=Tools.data_reduction(path,"MACE")
-        my_df.drop(["struct"],axis=1,inplace=True)
-        my_df = my_df[my_df["duplicate_of"].isna()]
-        dest_path=os.path.join(path,"Calc_report/MACE", "MACE_"+formula+"_all_reduced.csv")
-        my_df.to_csv(dest_path)
-        exit(0)
+    # if(ReduceData==True): 
+    #     from db import Tools
+    #     import pandas as pd
+    #     my_df=Tools.data_reduction(path,"MACE")
+    #     my_df.drop(["struct"],axis=1,inplace=True)
+    #     my_df = my_df[my_df["duplicate_of"].isna()]
+    #     dest_path=os.path.join(path,"Calc_report/MACE", "MACE_"+formula+"_all_reduced.csv")
+    #     my_df.to_csv(dest_path)
+    #     exit(0)
         
     if(BlockSearch!=True):
         res,neigh_list,exchange_dict=get_Neig(formula=formula,N_neig=N_neig)
@@ -321,6 +323,7 @@ def main():
             ML.M3GNet_calc(formula,path,path_results,relax=True)
         else:
             ML.M3GNet_calc(formula,path,path_results,relax=False)
+
     elif(calculator=="ALIGNN"):
         path_results=data_path+"/output_"+formula+"/Calc_report/ALIGNN/"
         if(Relax==True):
@@ -356,30 +359,90 @@ def main():
     else:
         pass
 
+    if(ReduceData==True): 
+        from db import Tools
+        import pandas as pd
 
+        GNN_path=data_path+"/output_"+formula+"/Calc_report/"
+
+        if not os.path.exists(GNN_path):
+            print("Warning: GNN evaluation is missing. Run again with the flag -calc <model_name>!")
+            exit(0)
+        Model_name_list=os.listdir(GNN_path)
+
+        if "ensemble" in Model_name_list:
+            my_df=Tools.data_reduction(path,"ensemble")
+            # dest_path_csv=os.path.join(path,"Calc_report/ensemble/Reduced")
+            # if not os.path.exists(dest_path_csv):
+            #     os.makedirs(dest_path_csv)
+            dest_path_csv=os.path.join(path,"Calc_report/ensemble")
+            dest_path_all=os.path.join(dest_path_csv, "ensemble_"+formula+"_all.csv")
+            dest_path_best=os.path.join(dest_path_csv, "ensemble_"+formula+"_best.csv")
+
+            my_df.to_csv(dest_path_all,index=False)
+
+            my_df=my_df.drop_duplicates(subset=["sym"])
+            my_df.to_csv(dest_path_best,index=False)
+        else:
+            for model_name in Model_name_list:
+                my_df=Tools.data_reduction(path,model_name)
+                # dest_path_csv=os.path.join(path,"Calc_report/"+model_name,"Reduced")
+                # if not os.path.exists(dest_path_csv):
+                    # os.makedirs(dest_path_csv)
+                dest_path_csv=os.path.join(path,"Calc_report",model_name)
+                dest_path_all=os.path.join(dest_path_csv, model_name+"_"+formula+"_all_reduced.csv")
+                dest_path_best=os.path.join(dest_path_csv, model_name+"_"+formula+"_best_reduced.csv")
+
+                my_df.to_csv(dest_path_all,index=False)
+
+                my_df=my_df.drop_duplicates(subset=["sym"])
+                my_df.to_csv(dest_path_best,index=False)
 
     if(CheckNew==True):
         from db import DBsearch
         DBsearch.find_unique_data(formula,path)
         if(top_n!="none"):
-            tag="best_OnlyNew.csv"
+            tag="all_OnlyNew.csv"
             DBsearch.copy_best_data(path,tag,top_n)
         elif(top_c!="none"):
-            tag="best.csv"
+            tag="all.csv"
             DBsearch.copy_best_data(path,tag,top_c)
         else:
             pass
     else:
         if(top_n!="none"):
             from db import DBsearch
-            tag="best_OnlyNew.csv"
+            tag="all_OnlyNew.csv"
             DBsearch.copy_best_data(path,tag,top_n)
         elif(top_c!="none"):
             from db import DBsearch
-            tag="best.csv"
+            tag="all.csv"
             DBsearch.copy_best_data(path,tag,top_c)
         else:
             pass
+
+    # if(CheckNew==True):
+    #     from db import DBsearch
+    #     DBsearch.find_unique_data(formula,path)
+    #     if(top_n!="none"):
+    #         tag="best_OnlyNew.csv"
+    #         DBsearch.copy_best_data(path,tag,top_n)
+    #     elif(top_c!="none"):
+    #         tag="best.csv"
+    #         DBsearch.copy_best_data(path,tag,top_c)
+    #     else:
+    #         pass
+    # else:
+    #     if(top_n!="none"):
+    #         from db import DBsearch
+    #         tag="best_OnlyNew.csv"
+    #         DBsearch.copy_best_data(path,tag,top_n)
+    #     elif(top_c!="none"):
+    #         from db import DBsearch
+    #         tag="best.csv"
+    #         DBsearch.copy_best_data(path,tag,top_c)
+    #     else:
+    #         pass
 
 if __name__=='__main__':
     main()

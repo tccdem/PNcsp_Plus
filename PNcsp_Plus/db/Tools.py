@@ -105,5 +105,11 @@ def data_reduction(path,GNN):
         group["is_unique"] = group["duplicate_of"].isna()
     
         all_rows.append(group)
-    return pd.concat(all_rows, ignore_index=True)
+
+    my_df=pd.concat(all_rows, ignore_index=True)
+    my_df.drop(["struct"],axis=1,inplace=True)
+    my_df = my_df[my_df["duplicate_of"].isna()]
+    my_df.drop(["duplicate_of","is_unique"],axis=1,inplace=True)
+    my_df = my_df.sort_values(by="Energy")
+    return my_df
     
