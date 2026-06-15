@@ -213,14 +213,14 @@ def categorize(N_neig,formula,data_path):
 
         dest = shutil.move(source_path, dest_path)  
 
-def show_config(formula,N_neig,E_filter,timer,online,calculator,database,BlockSearch,Relaxer,data_path,CheckNew,top_n,top_c):
+def show_config(formula,N_neig,E_filter,timer,online,calculator,database,BlockSearch,Relaxer,data_path,CheckNew,top_n,top_c,Reverse):
     print("\nProgram Configuration")
     print("---------------------")
     print("Query formula:\t",formula,"\nNeighbor order:\t",N_neig,
           "\nEnergy filter:\t",E_filter,"\nSleep timer:\t",timer,
           "\nOnline: \t",online,"\nCalculator: \t",calculator,"\nData source: \t",database,
           "\nBlockSearch: \t",BlockSearch,"\nRelaxer: \t",Relaxer,
-          "\nOutputDir: \t",data_path,"\nCheckNew: \t",CheckNew,"\nTop n: \t",top_n,"\nTop c: \t",top_c)
+          "\nOutputDir: \t",data_path,"\nCheckNew: \t",CheckNew,"\nTop n: \t",top_n,"\nTop c: \t",top_c,"\nReverse: \t",Reverse)
     print("---------------------\n")
 
 def main():
@@ -241,6 +241,7 @@ def main():
     parser.add_argument('-top_n','--top_n_new',default="none",help="Copies the top-n evaluated new structures, ranked by the GNN evaluation, to the Best_Structures folder if available [int, \"all\", \"none\"]. (default: none). Use this option together with --CheckNew, or in a subsequent run after a run performed with --CheckNew. ")
     parser.add_argument('-top_c','--top_n_calc',default="none",help="Copies the top-n evaluated structures, ranked by the GNN evaluation, to the Best_Structures folder if available [int, \"all\", \"none\"]. (default: none). Use this option together with --CheckNew, or in a subsequent run after a run performed with --CheckNew. ")
     parser.add_argument('--ReduceData',help="Removes duplicates.",action='store_true')
+    parser.add_argument('--Reverse',help="Searces neigborhood of given formula",action='store_true')
 
     args = parser.parse_args()
 
@@ -253,6 +254,7 @@ def main():
     BlockSearch=args.BlockSearch
     ReduceData=args.ReduceData
     CheckNew=args.CheckNew
+    Reverse=args.Reverse
     Relax=args.Relax
     
     if(args.time_sleep =="none"):
@@ -280,7 +282,7 @@ def main():
     else:
         top_c=int(args.top_n_calc)
 
-    show_config(formula=formula,N_neig=N_neig,E_filter=E_filter,timer=time_sleep,online=online,calculator=calculator,database=database,BlockSearch=BlockSearch,Relaxer=Relax,data_path=data_path,CheckNew=CheckNew,top_n=top_n,top_c=top_c)
+    show_config(formula=formula,N_neig=N_neig,E_filter=E_filter,timer=time_sleep,online=online,calculator=calculator,database=database,BlockSearch=BlockSearch,Relaxer=Relax,data_path=data_path,CheckNew=CheckNew,top_n=top_n,top_c=top_c,Reverse=Reverse)
     path=data_path+"/output_"+formula+"/"
 
     # if(ReduceData==True): 
@@ -292,6 +294,30 @@ def main():
     #     dest_path=os.path.join(path,"Calc_report/MACE", "MACE_"+formula+"_all_reduced.csv")
     #     my_df.to_csv(dest_path)
     #     exit(0)
+
+    if(Reverse==True):
+        from db import DBsearch
+        res,neigh_list,exchange_dict=get_Neig(formula=formula,N_neig=N_neig)
+        neigh_path=os.path.join(data_path,formula+"_neighborhood")
+        os.makedirs(neigh_path,exist_ok=True)
+        
+        with open(os.path.join(neigh_path,"neighborhood_"+str(N_neig)+".txt"),"w") as f:
+            f.write("System\tKnown_Structures\n")
+            for ne in res:
+                DBsearch.get_OQMD_data(ne,neigh_path+"/"+ne+"_")
+                DBsearch.get_MP_data(ne,neigh_path+"/"+ne+"_")
+                f.write(ne+"\t")
+                pos_count=0
+                neg_count=0
+                if os.path.exists(neigh_path+"/"+ne+"_Known_Structures"):
+                    for fname in os.listdir(neigh_path+"/"+ne+"_Known_Structures"):
+                        if fname.endswith("pos.cif"):
+                            pos_count += 1
+                        elif fname.endswith("neg.cif"):
+                            neg_count += 1
+                f.write(" pos:"+str(pos_count)+" neg:"+str(neg_count)+"\n")
+        exit(0)
+
         
     if(BlockSearch!=True):
         res,neigh_list,exchange_dict=get_Neig(formula=formula,N_neig=N_neig)

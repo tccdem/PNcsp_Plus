@@ -44,7 +44,7 @@ def get_OQMD_data(formula,path):
     Comp_ordered=offline_order([formula])[0]
     raw_data = qmpy.Entry.objects.filter(composition_id=Comp_ordered)
     if(len(raw_data)==0):
-        print(Comp_ordered,"--> no structure")
+        print(formula,"--> no structure")
         print("Target compound can not be found in OQMD!!")
         return None
 
@@ -109,6 +109,11 @@ def get_MP_data(formula,path):
         ]
         target_data=mpr.summary.search(formula=formula,fields=fields)
 
+    if len(target_data)==0:
+        print(formula,"--> no structure")
+        print("Target compound can not be found in MP!!")
+        return None
+    
     dest_path = f"{path}Known_Structures/"
 
     if not os.path.exists(dest_path):
