@@ -1,4 +1,4 @@
 PNcsp_Plus/DATA/**
 PNcsp_Plus/dev/**
-PNcsp_Plus/db/TCCDEMconnector.py
+PNcsp_Plus/db/DBconnector.py
 *autocasp*
