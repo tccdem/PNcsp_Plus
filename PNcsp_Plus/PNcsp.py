@@ -240,8 +240,11 @@ def main():
     # parser.add_argument('-top_c','--top_c_new',nargs=2,default=["none","none"],help="Copies the top-n evaluated new structures, ranked by the GNN evaluation, to the Best_Structures folder if available. Enter 2 input [first:[\"none\",\"full\",\"best\"], second:[int, \"all\", \"none\"]]. (default: [none,none]). Use this option together with --CheckNew, or in a subsequent run after a run performed with --CheckNew. ")
     parser.add_argument('-top_n','--top_n_new',default="none",help="Copies the top-n evaluated new structures, ranked by the GNN evaluation, to the Best_Structures folder if available [int, \"all\", \"none\"]. (default: none). Use this option together with --CheckNew, or in a subsequent run after a run performed with --CheckNew. ")
     parser.add_argument('-top_c','--top_n_calc',default="none",help="Copies the top-n evaluated structures, ranked by the GNN evaluation, to the Best_Structures folder if available [int, \"all\", \"none\"]. (default: none). Use this option together with --CheckNew, or in a subsequent run after a run performed with --CheckNew. ")
+    parser.add_argument('-project','--project',default=None,help="Assing project name. This option is only used together with --StoreData.")
+    parser.add_argument('-dim','--dimension',default=None,help="Assing dimension of the crystalline system. This option is only used together with --StoreData.")
     parser.add_argument('--ReduceData',help="Removes duplicates.",action='store_true')
     parser.add_argument('--Reverse',help="Searces neigborhood of given formula",action='store_true')
+    parser.add_argument('--StoreData',help="Stores generated data in local DB. For this option, you should have a local DB. ",action='store_true')
 
     args = parser.parse_args()
 
@@ -256,6 +259,9 @@ def main():
     CheckNew=args.CheckNew
     Reverse=args.Reverse
     Relax=args.Relax
+    StoreData=args.StoreData
+    project=args.project
+    dim=int(args.dimension)
     
     if(args.time_sleep =="none"):
         time_sleep=args.time_sleep
@@ -294,6 +300,14 @@ def main():
     #     dest_path=os.path.join(path,"Calc_report/MACE", "MACE_"+formula+"_all_reduced.csv")
     #     my_df.to_csv(dest_path)
     #     exit(0)
+
+    if(StoreData==True):
+        from db import DBconnector
+        if calculator=="none":
+            print("Error: Calculator is missing! Enter the calculator (MACE, M3GNet, ALIGNN).")
+            exit(0)
+        DBconnector.upload_data(data_path, formula, calculator, dim, project)
+        exit(0)
 
     if(Reverse==True):
         from db import DBsearch
@@ -447,28 +461,7 @@ def main():
         else:
             pass
 
-    # if(CheckNew==True):
-    #     from db import DBsearch
-    #     DBsearch.find_unique_data(formula,path)
-    #     if(top_n!="none"):
-    #         tag="best_OnlyNew.csv"
-    #         DBsearch.copy_best_data(path,tag,top_n)
-    #     elif(top_c!="none"):
-    #         tag="best.csv"
-    #         DBsearch.copy_best_data(path,tag,top_c)
-    #     else:
-    #         pass
-    # else:
-    #     if(top_n!="none"):
-    #         from db import DBsearch
-    #         tag="best_OnlyNew.csv"
-    #         DBsearch.copy_best_data(path,tag,top_n)
-    #     elif(top_c!="none"):
-    #         from db import DBsearch
-    #         tag="best.csv"
-    #         DBsearch.copy_best_data(path,tag,top_c)
-    #     else:
-    #         pass
+
 
 if __name__=='__main__':
     main()
