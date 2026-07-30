@@ -261,7 +261,8 @@ def main():
     Relax=args.Relax
     StoreData=args.StoreData
     project=args.project
-    dim=int(args.dimension)
+    if args.dimension:
+        dim=int(args.dimension)
     
     if(args.time_sleep =="none"):
         time_sleep=args.time_sleep

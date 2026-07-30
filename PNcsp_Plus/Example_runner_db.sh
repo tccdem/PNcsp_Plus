@@ -10,24 +10,24 @@ COMPOUNDS=(
 Al1Cu1
 )
 
-# echo "+++ date 1 +++";
-# date 
-# # Neighbor search + Generation of prototypes
-# echo "***** Neighbor Search ******";
-# for compound in "${COMPOUNDS[@]}"; do
-#     PNCSP_CMD=(python PNcsp.py "$compound" -out "$OUT")
-#     echo "***** $compound neigh=1 ******";
-#     "${PNCSP_CMD[@]}" -n 1;
-#     echo "***** $compound neigh=2 ******";
-#     "${PNCSP_CMD[@]}" -n 2;
-#     # echo "***** $compound neigh=3 ******";
-#     # "${PNCSP_CMD[@]}" -n 3;
-#     # echo "***** $compound neigh=4 ******";
-#     # "${PNCSP_CMD[@]}" -n 4;
-#     # echo "----------------------------";
-# done
-# echo "+++ date 2+++";
-# date 
+echo "+++ date 1 +++";
+date 
+# Neighbor search + Generation of prototypes
+echo "***** Neighbor Search ******";
+for compound in "${COMPOUNDS[@]}"; do
+    PNCSP_CMD=(python PNcsp.py "$compound" -out "$OUT")
+    echo "***** $compound neigh=1 ******";
+    "${PNCSP_CMD[@]}" -n 1;
+    echo "***** $compound neigh=2 ******";
+    "${PNCSP_CMD[@]}" -n 2;
+    # echo "***** $compound neigh=3 ******";
+    # "${PNCSP_CMD[@]}" -n 3;
+    # echo "***** $compound neigh=4 ******";
+    # "${PNCSP_CMD[@]}" -n 4;
+    # echo "----------------------------";
+done
+echo "+++ date 2+++";
+date 
 
 # # GNN evaluation + Data reduction (internal) (generate csv files under Calc_report)
 # echo "***** GNN evaluation + Data reduction ******";
