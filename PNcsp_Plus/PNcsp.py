@@ -223,7 +223,7 @@ def show_config(formula,N_neig,E_filter,timer,online,calculator,database,BlockSe
           "\nOutputDir: \t",data_path,"\nCheckNew: \t",CheckNew,"\nTop n: \t",top_n,"\nTop c: \t",top_c,"\nReverse: \t",Reverse)
     print("---------------------\n")
 
-def main():
+def main(args_list=None):
     parser = argparse.ArgumentParser(prog="PNcsp",description= "PNcsp: A PN similarty based initial structure generator.")
     parser.add_argument('formula')
     parser.add_argument('-n','--neighbor',default=1,help="Order of neighbors to be considered in the similarity search. (default: 1)")
@@ -246,7 +246,7 @@ def main():
     parser.add_argument('--Reverse',help="Searces neigborhood of given formula",action='store_true')
     parser.add_argument('--StoreData',help="Stores generated data in local DB. For this option, you should have a local DB. ",action='store_true')
 
-    args = parser.parse_args()
+    args = parser.parse_args(args_list)
 
     formula=args.formula
 
