@@ -17,10 +17,10 @@ PNcsp+ with its default configuration scans a local instance of the [OQMD](https
 This program is based on Python 3 under Anaconda. 
 
 1) Clone the repository.
-2) Open terminal and locate the directory.
+2) Open terminal and locate the PNcsp_Plus directory.
 3) Install reuqirements (check also all_requirements.txt):
 ```bash
-   pip install -r requirements.txt
+   pip install .
 ```
 4) Help page:
 ```bash
@@ -28,7 +28,7 @@ This program is based on Python 3 under Anaconda.
 ```
 5) Run the Python code (minimal):
 ```bash
-  python PNcsp.py <formula> -n <neighbor_order>  -f <energy_filter> -c <calculator>
+  PNcsp <formula> -n <neighbor_order>  -f <energy_filter> -c <calculator>
 ```
 
 - `-n`, `--neighbor`  
@@ -90,6 +90,6 @@ Created prototypes are shown in "output" folder in current directory.
 
 ### Example usage
 ```bash
-python PNcsp.py Na2Cl1 -n 3 -f 0.1 -c MACE -out ./output_dir
+PNcsp Na2Cl1 -n 3 -f 0.1 -c MACE -out ./output_dir
 ```
 
