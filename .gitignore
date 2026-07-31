@@ -1,4 +1,6 @@
 PNcsp_Plus/DATA/**
 PNcsp_Plus/dev/**
 PNcsp_Plus/db/DBconnector.py
+PNcsp_Plus.egg-info
+build
 *autocasp*
