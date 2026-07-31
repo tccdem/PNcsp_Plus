@@ -29,28 +29,28 @@ done
 echo "+++ date 2+++";
 date 
 
-# # GNN evaluation + Data reduction (internal) (generate csv files under Calc_report)
-# echo "***** GNN evaluation + Data reduction ******";
-# for compound in "${COMPOUNDS[@]}"; do
-#     PNCSP_CMD=(python PNcsp.py "$compound" -out "$OUT")
-#     echo "***** $compound ******";
-#     "${PNCSP_CMD[@]}" --BlockSearch -calc "$CALC" --ReduceData;
-#     echo "----------------------------";
-# done
+# GNN evaluation + Data reduction (internal) (generate csv files under Calc_report)
+echo "***** GNN evaluation + Data reduction ******";
+for compound in "${COMPOUNDS[@]}"; do
+    PNCSP_CMD=(python PNcsp.py "$compound" -out "$OUT")
+    echo "***** $compound ******";
+    "${PNCSP_CMD[@]}" --BlockSearch -calc "$CALC" --ReduceData;
+    echo "----------------------------";
+done
 
 # echo "+++ date 3+++";
 # date 
 
-# # Detection of new structures (external) + Copy Data 
-# echo "***** Detection of new structures + Copy Data ******";
-# for compound in "${COMPOUNDS[@]}"; do
-#     PNCSP_CMD=(python PNcsp.py "$compound" -out "$OUT")
-#     echo "***** $compound ******";
-#     # "${PNCSP_CMD[@]}" --BlockSearch -top_c all;
-#     "${PNCSP_CMD[@]}" --BlockSearch --CheckNew -top_c all;
-#     echo "***********************";
-#     echo "----------------------------";
-# done
+# Detection of new structures (external) + Copy Data 
+echo "***** Detection of new structures + Copy Data ******";
+for compound in "${COMPOUNDS[@]}"; do
+    PNCSP_CMD=(python PNcsp.py "$compound" -out "$OUT")
+    echo "***** $compound ******";
+    # "${PNCSP_CMD[@]}" --BlockSearch -top_c all;
+    "${PNCSP_CMD[@]}" --BlockSearch --CheckNew -top_c all;
+    echo "***********************";
+    echo "----------------------------";
+done
 
 for compound in "${COMPOUNDS[@]}"; do
     PNCSP_CMD=(python PNcsp.py "$compound" -out "$OUT")

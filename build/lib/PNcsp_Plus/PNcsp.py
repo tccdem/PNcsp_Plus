@@ -309,7 +309,7 @@ def main(args_list=None):
     #     exit(0)
 
     if(StoreData==True):
-        from PNcsp_Plus.db import DBconnector
+        from db import DBconnector
         if calculator=="none":
             print("Error: Calculator is missing! Enter the calculator (MACE, M3GNet, ALIGNN).")
             exit(0)

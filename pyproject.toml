@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "PNcsp_Plus"
+version = "0.1.0"
+description = "A Periodic Number-Based Crystal Structure Prediction Method Enhanced by Machine Learning"
+authors = [
+    { name="Cem Oran", email="oranc@itu.edu.tr" }
+]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "pymatgen",
+    "ase==3.25.0",
+    "qmpy==1.4.0",
+    "numpy==1.26.4",
+    "more-itertools",
+    "qmpy_rester",
+    "tensorflow==2.14.0",
+    "m3gnet==0.2.4",
+    "mace-torch==0.3.14",
+    "alignn==2025.4.1",
+    "MarkupSafe==2.0.1"
+]
+
+# Expose CLI commands in the terminal automatically
+[project.scripts]
+PNcsp = "PNcsp_Plus.PNcsp:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["PNcsp_Plus*"]
+
+# Include non-Python files (like CSVs) inside the installed package directory
+[tool.setuptools.package-data]
+"PNcsp_Plus" = ["db/data/*"]
