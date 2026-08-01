@@ -31,8 +31,11 @@ def get_data_OQMD(Comp_list,neigh_list,Energy_filter):
         for k in range(len(raw_data)):
             comp=raw_data[k]
             delta_e=comp.energy
-            if delta_e<=Energy_filter:
+            if Energy_filter==None:
                 list_of_data["data"].append({"name":comp.name, "spacegroup":comp.spacegroup, "cell":comp.structure.cell, "sites":comp.structure.atoms, "Neigh":neigh_list[i],"Original":Comp_list[i]})
+            else:
+                if delta_e<=Energy_filter:
+                    list_of_data["data"].append({"name":comp.name, "spacegroup":comp.spacegroup, "cell":comp.structure.cell, "sites":comp.structure.atoms, "Neigh":neigh_list[i],"Original":Comp_list[i]})
         if list_of_data["data"]!=[]:
             All_list.append(list_of_data)
             print(Comp_list_ordered[i])

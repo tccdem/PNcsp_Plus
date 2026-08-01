@@ -13,7 +13,7 @@ date
 # Neighbor search + Generation of prototypes
 echo "***** Neighbor Search ******";
 for compound in "${COMPOUNDS[@]}"; do
-    PNCSP_CMD=(python PNcsp.py "$compound" -out "$OUT")
+    PNCSP_CMD=(PNcsp "$compound" -out "$OUT")
     echo "***** $compound neigh=1 ******";
     "${PNCSP_CMD[@]}" -n 1;
     echo "***** $compound neigh=2 ******";
@@ -30,7 +30,7 @@ date
 # GNN evaluation + Data reduction (internal) (generate csv files under Calc_report)
 echo "***** GNN evaluation + Data reduction ******";
 for compound in "${COMPOUNDS[@]}"; do
-    PNCSP_CMD=(python PNcsp.py "$compound" -out "$OUT")
+    PNCSP_CMD=(PNcsp "$compound" -out "$OUT")
     echo "***** $compound ******";
     "${PNCSP_CMD[@]}" --BlockSearch -calc MACE --ReduceData;
     echo "----------------------------";
@@ -42,7 +42,7 @@ date
 # Detection of new structures (external) + Copy Data 
 echo "***** Detection of new structures + Copy Data ******";
 for compound in "${COMPOUNDS[@]}"; do
-    PNCSP_CMD=(python PNcsp.py "$compound" -out "$OUT")
+    PNCSP_CMD=(PNcsp "$compound" -out "$OUT")
     echo "***** $compound ******";
     # "${PNCSP_CMD[@]}" --BlockSearch -top_c all;
     "${PNCSP_CMD[@]}" --BlockSearch --CheckNew -top_c all;

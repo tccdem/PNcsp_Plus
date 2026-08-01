@@ -5,7 +5,7 @@ def get_data_OQMD(Comp_list,neigh_list,Energy_filter,timer):
     All_list=[]
     for i in range(len(Comp_list)):
         with qr.QMPYRester() as q:
-            if(Energy_filter=="none"):
+            if(Energy_filter==None):
                 kwargs = {
                     'composition': {Comp_list[i]},
                     'format': 'json',
@@ -26,7 +26,7 @@ def get_data_OQMD(Comp_list,neigh_list,Energy_filter,timer):
             
             if(list_of_data['data']==[]):
                 print(Comp_list[i],"--> no structure")
-                if(timer!="none"):
+                if(timer!=None):
                     time.sleep(timer)
                 continue
             
