@@ -43,7 +43,7 @@ def get_data_OQMD(Comp_list,neigh_list,Energy_filter,timer):
             time.sleep(timer)
     if(All_list==[]):
         print("Warning: No candidates were found! TERMINATED!")
-        exit(0)
+        # exit(0)
 
     return All_list
 

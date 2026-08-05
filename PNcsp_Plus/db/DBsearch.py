@@ -13,8 +13,44 @@ def offline_order(Comp_list):
             if (j!=len(comp_id)-1):
                 comp_query+=" "
         Comp_list_ordered.append(comp_query)
-    print(Comp_list_ordered)
+    # print(Comp_list_ordered)
     return Comp_list_ordered
+
+def list_OQMD_data(formula):
+    from pymatgen.core import Composition
+    from itertools import product
+    from math import gcd
+    from functools import reduce
+    import qmpy
+
+    def reduce_list(nums):
+        g = reduce(gcd, nums)
+        return [n // g for n in nums]
+
+    
+    def parse_formula_counts(formula):
+        matches = re.findall(r'[A-Z][a-z]*|\d+', formula)
+        return {matches[i]: int(matches[i+1]) for i in range(0, len(matches), 2)}
+
+    All_list=[]
+    Comp_ordered=offline_order([str(Composition(formula)).replace(" ", "")])[0]
+    raw_data = qmpy.Entry.objects.filter(composition_id=Comp_ordered)
+    if(len(raw_data)==0):
+        print(formula,"--> no structure")
+        print("Target compound can not be found in OQMD!!")
+        return None
+
+    target_data=[]
+    for k in range(len(raw_data)):
+        comp=raw_data[k]
+        delta_e=comp.energy
+        target_data.append({"name":comp.name, "spacegroup":comp.spacegroup.number,"delta_e":delta_e})
+    target_df=pd.DataFrame(target_data).sort_values(by="delta_e").reset_index(drop=True)
+    # for ind_ext, entry in enumerate(target_data['data']):
+    #     name = entry['name']
+    #     spacegroup_num = entry['spacegroup'].number
+    #     delta_e = entry['delta_e']     
+    return target_df
 
 def get_OQMD_data(formula,path):
 

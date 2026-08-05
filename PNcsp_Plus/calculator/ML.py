@@ -2,6 +2,18 @@ import os
 import pandas as pd
 from ase.io import read, write
 
+def find_neigh_list(path):
+    if os.path.exists(path):
+        neigh_list=[x for x in os.listdir(path) if "Neigh" in x]
+        if not neigh_list:
+            print("Warning! There is no prototype!")
+            return(None)
+    else:
+        print("Warning! There is no prototype!")
+        return(None)
+    return(neigh_list)
+
+
 def general_relaxer(atoms, calculator, logfile, fmax=0.05, steps=500, CellFilter=True):
     from ase.optimize.fire import FIRE
     from ase.constraints import ExpCellFilter
@@ -41,27 +53,18 @@ def general_relaxer(atoms, calculator, logfile, fmax=0.05, steps=500, CellFilter
         return atoms, atoms.get_potential_energy()
 
 def MACE_calc(formula,path,path_results,relax):
-    from mace.calculators import mace_mp
-    # from ase.optimize.fire import FIRE
-    # from ase.constraints import ExpCellFilter
-    # import ase
-    
 
-    # atoms = read("./Si2_modified.cif")
-    # atom_num=atoms.get_global_number_of_atoms()
+    neigh_list=find_neigh_list(path)
+    if not neigh_list:
+        return False
+    
+    from mace.calculators import mace_mp
 
     print("\nMACE is activated...\n")
     if not os.path.exists(path_results):
         os.makedirs(path_results)
-    # comp_list=os.listdir(path)
-    # for comp in comp_list:
-    #     if not "output_" in comp:
-    #         continue
-    #     print(comp)
+
     struct_list_init=[]
-    neigh_list=os.listdir(path)
-    if(neigh_list==[]):
-        exit(0)
     for neigh in neigh_list:
         if "Neigh" not in neigh:
             continue
@@ -196,6 +199,7 @@ def MACE_calc(formula,path,path_results,relax):
     print("------------------------")
     print("Terminated Sucessfully!")  
     
+    return(True)
     # # atoms.calc = calc
     # final_structure, final_energy = general_relaxer(atoms=atoms,calculator=calc,relax=True,CellFilter=False)
 
@@ -209,6 +213,11 @@ def MACE_calc(formula,path,path_results,relax):
     # write("./Si2_opt.cif", final_structure)
 
 def ALIGNN_calc(formula,path,path_results,relax):
+
+    neigh_list=find_neigh_list(path)
+    if not neigh_list:
+        return False
+    
     from alignn.ff.ff import AlignnAtomwiseCalculator, default_path
     from jarvis.core.atoms import Atoms, ase_to_atoms
     # from ase.constraints import ExpCellFilter
@@ -228,9 +237,6 @@ def ALIGNN_calc(formula,path,path_results,relax):
     #         continue
     #     print(comp)
     struct_list_init=[]
-    neigh_list=os.listdir(path)
-    if(neigh_list==[]):
-        exit(0)
     for neigh in neigh_list:
         if "Neigh" not in neigh:
             continue
@@ -363,8 +369,14 @@ def ALIGNN_calc(formula,path,path_results,relax):
     print("Done")
     print("------------------------")
     print("Terminated Sucessfully!")
+    return(True)
 
 def M3GNet_calc(formula,path,path_results,relax):
+
+    neigh_list=find_neigh_list(path)
+    if not neigh_list:
+        return False
+    
     import warnings
 
     from m3gnet.models import Relaxer
@@ -393,7 +405,9 @@ def M3GNet_calc(formula,path,path_results,relax):
     struct_list_init=[]
     neigh_list=os.listdir(path)
     if(neigh_list==[]):
-        exit(0)
+        # exit(0)
+        print("Warning! There is no prototype!")
+        return(False)
     for neigh in neigh_list:
         if "Neigh" not in neigh:
             continue
@@ -484,6 +498,8 @@ def M3GNet_calc(formula,path,path_results,relax):
     print("------------------------")
     print("Terminated Sucessfully!")
 
+    return(True)
+
 def ensemble_vote(formula,path_alignn,path_mace,path_m3gnet,path_results, N_model=2):
     if not os.path.exists(path_results):
         os.makedirs(path_results)
@@ -542,120 +558,3 @@ def ensemble_vote(formula,path_alignn,path_mace,path_m3gnet,path_results, N_mode
         merged_df = merged_df.drop(columns=["Sym"])
         merged_df.to_csv(path_results+"EnsembleVote_"+formula+"_best.csv",index=False)
     print("Ensemble vote is successfully determined.")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# def m3gnet_energy_test():
-#     # import warnings
-#     from m3gnet.models import M3GNet
-#     from pymatgen.core import Lattice, Structure
-
-#     # suppress TensorFlow warnings
-#     # for category in (UserWarning, DeprecationWarning):
-#     #     warnings.filterwarnings("ignore", category=category, module="tensorflow")
-
-#     # 1. Build your (possibly unrelaxed) structure:
-#     #    Here we use Mo in a slightly stretched cell.
-#     mo = Structure(
-#         Lattice.cubic(3.3), 
-#         ["Mo", "Mo"], 
-#         [[0.0, 0.0, 0.0], [0.5, 0.5, 0.5]]
-#     )
-
-#     # 2. Load the pretrained M3GNet model:
-#     #    This is a shortcut for M3GNet.from_dir(...) that downloads weights if needed.
-#     model = M3GNet.load()  # defaults to "MP-2021.2.8-EFS" :contentReference[oaicite:1]{index=1}
-
-#     # 3. Predict the (intensive) energy:
-#     #    Returns a tf.Tensor of shape () giving eV/atom.
-#     energy_per_atom = model.predict_structure(mo)
-
-#     # 4. (Optional) convert to a Python float:
-#     energy_per_atom = float(energy_per_atom)
-
-#     print(f"Predicted energy (no relaxation) = {energy_per_atom:.4f} eV/atom")
-
-# def megnet_calc_old(path,path_results):
-#     import warnings
-
-#     from m3gnet.models import Relaxer
-#     from pymatgen.core import Lattice, Structure
-
-#     import os
-#     import pandas as pd
-
-#     for category in (UserWarning, DeprecationWarning):
-#         warnings.filterwarnings("ignore", category=category, module="tensorflow")
-
-#     from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-#     # path="./Unknown_Systems_Data/Negative/"
-    
-#     print("\nM3GNET is activated...\n")
-#     if not os.path.exists(path_results):
-#         os.makedirs(path_results)
-#     comp_list=os.listdir(path)
-#     for comp in comp_list:
-#         if not "output_" in comp:
-#             continue
-#         print(comp)
-#         struct_list_init=[]
-#         neigh_list=os.listdir(path+comp)
-#         if(neigh_list==[]):
-#             continue
-#         for neigh in neigh_list:
-#             if "Neigh" not in neigh:
-#                 continue
-#             # if neigh!="1_Neigh":
-#             #     continue
-#             sym_list=os.listdir(path+comp+"/"+neigh)
-#             if(sym_list==[]):
-#                 continue
-#             for sym in sym_list:
-#                 proto_list=os.listdir(path+comp+"/"+neigh+"/"+sym)
-#                 if(proto_list==[]):
-#                     continue
-#                 for proto in proto_list:
-#                     target_path=path+comp+"/"+neigh+"/"+sym+"/"+proto
-#                     # print(comp,neigh,sym,proto)
-#                     struct=Structure.from_file(target_path)
-#                     struct_list_init.append([struct,comp,neigh,sym,proto])
-#                     # print(proto)
-#         print("\nTotal number of systems:",len(struct_list_init))
-#         print("------------------------")
-#         print("Relaxer starts...")
-        
-#         final_structure_list=[]
-#         relaxer=Relaxer()
-#         for struct in struct_list_init:
-#             print(struct[-1])
-#             relax_results = relaxer.relax(struct[0], verbose=False)
-
-#             final_structure=relax_results['final_structure']
-#             final_energy_per_atom=float(relax_results['trajectory'].energies[-1] / len(struct[0]))
-#             final_structure_list.append({"CIF_Name":struct[4].replace(".cif",""),"Sym":struct[3],"Neigh_Order":struct[2],"Energy":final_energy_per_atom,"Target":struct[1].replace("output_",""),"Struc_Init":struct[0],"Struc_Final":final_structure,})
-#             if not os.path.exists(path_results+struct[4]+"_opt.cif"):
-#                 final_structure.to_file(path_results+struct[4]+"_opt.cif")
-#             # print(f"Relaxed lattice parameter is {final_structure.lattice.abc[0]:.3f} Å")
-#             # print(f"Final energy is {final_energy_per_atom:.3f} eV/atom")
-#         df=pd.DataFrame(final_structure_list)
-#         df['Energy'] = df['Energy'].round(3)
-#         df=df.sort_values(by=["Energy"])
-#         df=df.drop_duplicates(subset=["Sym"])
-#         df[["CIF_Name","Sym","Neigh_Order","Energy","Target"]].to_csv(path_results+final_structure_list[0]["Target"].replace("output_","")+'.csv', index=False)
-#         print("Done")
-#         print("------------------------")
-#     print("Terminated Sucessfully!")

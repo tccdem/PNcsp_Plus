@@ -8,6 +8,7 @@ __author__ = "Cem Oran"
 
 # 2. Expose core functions/classes at the root package level
 from .PNcsp import run, get_Neig, get_Symbol, get_PN, convert_formula
+from PNcsp_Plus.db import DBsearch
 
 # 3. Control public exports for wildcard imports (`from PNcsp_Plus import *`)
 __all__ = [

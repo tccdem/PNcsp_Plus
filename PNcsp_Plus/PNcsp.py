@@ -14,8 +14,10 @@ import time
 import sys
 import argparse
 from pathlib import Path
+from pymatgen.core import Composition
 
 from PNcsp_Plus.calculator import ML
+from PNcsp_Plus.db import DBsearch
 
 # Get the directory where PNcsp.py actually lives
 PACKAGE_DIR = Path(__file__).resolve().parent
@@ -96,8 +98,6 @@ def get_Neig(formula, N_neig):
         for j in range(i+1,len(PNs)):
             if(abs(PNs[i]-PNs[j])<=2*N_neig):
                 print("\nWARNING: The neighbors of the ",elems[i],"and",elems[j] ,"overlap. This is not a problem, but it is advisable to exercise caution when examining the output CIFs.")
-    print("\n")
-
     # New Exchange Look-up Table
     exchange_dict={}
     for i in range(len(PN_new_all)):
@@ -107,7 +107,7 @@ def get_Neig(formula, N_neig):
                 exchange_dict[key].append(elems[i])
             else:
                 exchange_dict[key]=[elems[i]]
-    print("\nexchange_dict: ",exchange_dict)
+    print("exchange_dict: ",exchange_dict)
 
     # Exchange Look-up Table for PN
     exchange_dict_PN={}
@@ -192,10 +192,36 @@ def show_config(formula,N_neig,E_filter,timer,online,calculator,database,BlockSe
           "\nOutputDir: \t",data_path,"\nCheckNew: \t",CheckNew,"\nTop n:  \t",top_n,"\nTop c:  \t",top_c,"\nReverse: \t",Reverse,"\nStore Data: \t",StoreData)
     print("---------------------\n")
 
+def order_formula(comp):
+    import re
+    
+    parts = re.findall(r"([A-Z][a-z]?)(\d*)", comp.strip())
+    comp_w1=""
+    for el, num in parts:
+        comp_w1+=el
+        comp_w1+=num if num else "1"
+
+    comp_decomp=[x for x in re.split(r'(?=[A-Z])', comp_w1) if x]
+    # comp_decomp=sorted(comp_decomp)
+    # comp_ordered=""
+    # for j in range(len(comp_decomp)):
+    #     comp_ordered+=comp_decomp[j]
+
+    # if len(re.sub(r"\d+", "", comp_ordered))!=len(re.sub(r"\d+", "", comp)):
+    #     print(f"Error: Invalid formula: '{comp}'. Elements start with capital letter and followed by ration. For ex: Na1Cl1, Al1Fe2")
+    #     return ""
+    return comp_w1  
+
 def run(formula,N_neig=1,E_filter=0,time_sleep=None,online="False",calculator=None,data_path=".",
         BlockSearch=False,Relax=False,database="OQMD",CheckNew=False,top_n=None,
         top_c=None,project=None,dim=None,ReduceData=False,Reverse=False,StoreData=False):
     
+    formula=order_formula(str(Composition(formula)).replace(" ", ""))
+    # formula=order_formula(formula)
+
+    if not formula:
+        return(None)
+
     show_config(formula=formula,N_neig=N_neig,E_filter=E_filter,timer=time_sleep,online=online,
                 calculator=calculator,database=database,BlockSearch=BlockSearch,Relaxer=Relax,
                 data_path=data_path,CheckNew=CheckNew,top_n=top_n,top_c=top_c,Reverse=Reverse,StoreData=StoreData)
@@ -205,12 +231,11 @@ def run(formula,N_neig=1,E_filter=0,time_sleep=None,online="False",calculator=No
         from PNcsp_Plus.db import DBconnector
         if calculator==None:
             print("Error: Calculator is missing! Enter the calculator (MACE, M3GNet, ALIGNN).")
-            exit(0)
+            return(None)
         DBconnector.upload_data(data_path, formula, calculator, dim, project)
-        exit(0)
+        return(None)
 
     if(Reverse==True):
-        from PNcsp_Plus.db import DBsearch
         res,neigh_list,exchange_dict=get_Neig(formula=formula,N_neig=N_neig)
         neigh_path=os.path.join(data_path,formula+"_neighborhood")
         os.makedirs(neigh_path,exist_ok=True)
@@ -230,60 +255,87 @@ def run(formula,N_neig=1,E_filter=0,time_sleep=None,online="False",calculator=No
                         elif fname.endswith("neg.cif"):
                             neg_count += 1
                 f.write(" pos:"+str(pos_count)+" neg:"+str(neg_count)+"\n")
-        exit(0)
+        return(None)
 
         
     if(BlockSearch!=True):
-        res,neigh_list,exchange_dict=get_Neig(formula=formula,N_neig=N_neig)
+        for neig in range(1,N_neig+1):
+            print("\n*** Neighbor:",neig,"***")
+            res,neigh_list,exchange_dict=get_Neig(formula=formula,N_neig=neig)
 
-        if(database=="OQMD"):
-            if(online==True):
-                from PNcsp_Plus.db import OQMDonline
-                All_list=OQMDonline.get_data_OQMD(res,neigh_list,Energy_filter=E_filter,timer=time_sleep)
-                OQMDonline.create_prototype_OQMD(All_list,exchange_dict,formula=formula,data_path=data_path)
-            else:
-                from PNcsp_Plus.db import OQMDoffline
-                All_list=OQMDoffline.get_data_OQMD(res,neigh_list,Energy_filter=E_filter)
-                OQMDoffline.create_prototype_OQMD(All_list,exchange_dict,formula=formula,data_path=data_path)
-        elif(database=="MP"):
-            from PNcsp_Plus.db import MPonline
-            All_list=MPonline.get_data_MP(res,Energy_filter=E_filter)
-            MPonline.create_prototype_MP(All_list, exchange_dict, formula=formula, neigh=N_neig,data_path=data_path)
-        elif(database=="MPDS"):
-            print("WARNING: MPDS implementation is under construction. Choose another data source and run again.")
-            exit(0)
+            if(database=="OQMD"):
+                if(online==True):
+                    from PNcsp_Plus.db import OQMDonline
+                    All_list=OQMDonline.get_data_OQMD(res,neigh_list,Energy_filter=E_filter,timer=time_sleep)
+                    if not All_list:
+                        continue
+                        return(None)
+                    OQMDonline.create_prototype_OQMD(All_list,exchange_dict,formula=formula,data_path=data_path)
+                else:
+                    from PNcsp_Plus.db import OQMDoffline
+                    All_list=OQMDoffline.get_data_OQMD(res,neigh_list,Energy_filter=E_filter)
+                    if not All_list:
+                        continue
+                        return(None)
+                    OQMDoffline.create_prototype_OQMD(All_list,exchange_dict,formula=formula,data_path=data_path)
+            elif(database=="MP"):
+                from PNcsp_Plus.db import MPonline
+                All_list=MPonline.get_data_MP(res,Energy_filter=E_filter)
+                if not All_list:
+                    continue
+                    return(None)
+                MPonline.create_prototype_MP(All_list, exchange_dict, formula=formula, neigh=N_neig,data_path=data_path)
+            elif(database=="MPDS"):
+                print("WARNING: MPDS implementation is under construction. Choose another data source and run again.")
+                return(None)
+            categorize(N_neig=neig,formula=formula,data_path=data_path)
             
-        print("TERMINATED SUCCESFULLY!\n")
-        categorize(N_neig=N_neig,formula=formula,data_path=data_path)
+        print("STRUCTURE SEARCH TERMINATED SUCCESFULLY!\n")
+        
     
     if(calculator=="M3GNet"):
         # ML.M3GNet_calc("./","./output_"+formula+"/Calc_report/")
         path_results=data_path+"/output_"+formula+"/Calc_report/M3GNet/"
         if(Relax==True):
-            ML.M3GNet_calc(formula,path,path_results,relax=True)
+            ML_res=ML.M3GNet_calc(formula,path,path_results,relax=True)
+            if not ML_res:
+                return(None)
         else:
-            ML.M3GNet_calc(formula,path,path_results,relax=False)
+            ML_res=ML.M3GNet_calc(formula,path,path_results,relax=False)
+            if not ML_res:
+                return(None)
 
     elif(calculator=="ALIGNN"):
         path_results=data_path+"/output_"+formula+"/Calc_report/ALIGNN/"
         if(Relax==True):
-            ML.ALIGNN_calc(formula,path,path_results,relax=True)
+            ML_res=ML.ALIGNN_calc(formula,path,path_results,relax=True)
+            if not ML_res:
+                return(None)
         else:
-            ML.ALIGNN_calc(formula,path,path_results,relax=False)
+            ML_res=ML.ALIGNN_calc(formula,path,path_results,relax=False)
+            if not ML_res:
+                return(None)
+            
     elif(calculator=="MACE"):
         path_results=data_path+"/output_"+formula+"/Calc_report/MACE/"
         if(Relax==True):
-            ML.MACE_calc(formula,path,path_results,relax=True)
+            ML_res=ML.MACE_calc(formula,path,path_results,relax=True)
+            if not ML_res:
+                return(None)
         else:
-            ML.MACE_calc(formula,path,path_results,relax=False)
+            ML_res=ML.MACE_calc(formula,path,path_results,relax=False)
+            if not ML_res:
+                return(None)
     elif(calculator=="ensemble"):
         path_results=data_path+"/output_"+formula+"/Calc_report/ensemble/"
         if(Relax==True):
             print("\nERROR: You can not run Majority Vote with relaxation.\n")
         else:
             path_alignn=data_path+"/output_"+formula+"/Calc_report/ALIGNN/"
-            ML.ALIGNN_calc(formula,path,path_alignn,relax=False)
-
+            ML_res=ML.ALIGNN_calc(formula,path,path_alignn,relax=False)
+            if not ML_res:
+                return(None)
+            
             path_mace=data_path+"/output_"+formula+"/Calc_report/MACE/"
             ML.MACE_calc(formula,path,path_mace,relax=False)
 
@@ -303,7 +355,7 @@ def run(formula,N_neig=1,E_filter=0,time_sleep=None,online="False",calculator=No
 
         if not os.path.exists(GNN_path):
             print("Warning: GNN evaluation is missing. Run again with the flag -calc <model_name>!")
-            exit(0)
+            return(None)
         Model_name_list=os.listdir(GNN_path)
 
         if "ensemble" in Model_name_list:
@@ -329,7 +381,6 @@ def run(formula,N_neig=1,E_filter=0,time_sleep=None,online="False",calculator=No
                 my_df.to_csv(dest_path_best,index=False)
 
     if(CheckNew==True):
-        from PNcsp_Plus.db import DBsearch
         DBsearch.find_unique_data(formula,path)
         if(top_n!=None):
             tag="all_OnlyNew.csv"
@@ -341,11 +392,9 @@ def run(formula,N_neig=1,E_filter=0,time_sleep=None,online="False",calculator=No
             pass
     else:
         if(top_n!=None):
-            from PNcsp_Plus.db import DBsearch
             tag="all_OnlyNew.csv"
             DBsearch.copy_best_data(path,tag,top_n)
         elif(top_c!=None):
-            from PNcsp_Plus.db import DBsearch
             tag="all.csv"
             DBsearch.copy_best_data(path,tag,top_c)
         else:
@@ -441,171 +490,6 @@ def main(args_list=None):
     run(formula,N_neig=N_neig,E_filter=E_filter,time_sleep=time_sleep,online=online,calculator=calculator,data_path=data_path,
         BlockSearch=BlockSearch,Relax=Relax,database=database,CheckNew=CheckNew,top_n=top_n,
         top_c=top_c,project=project,dim=dim,ReduceData=ReduceData,Reverse=Reverse,StoreData=StoreData)
-
-    # show_config(formula=formula,N_neig=N_neig,E_filter=E_filter,timer=time_sleep,online=online,calculator=calculator,database=database,BlockSearch=BlockSearch,Relaxer=Relax,data_path=data_path,CheckNew=CheckNew,top_n=top_n,top_c=top_c,Reverse=Reverse)
-    # path=data_path+"/output_"+formula+"/"
-
-    # if(StoreData==True):
-    #     from PNcsp_Plus.db import DBconnector
-    #     if calculator=="none":
-    #         print("Error: Calculator is missing! Enter the calculator (MACE, M3GNet, ALIGNN).")
-    #         exit(0)
-    #     DBconnector.upload_data(data_path, formula, calculator, dim, project)
-    #     exit(0)
-
-    # if(Reverse==True):
-    #     from PNcsp_Plus.db import DBsearch
-    #     res,neigh_list,exchange_dict=get_Neig(formula=formula,N_neig=N_neig)
-    #     neigh_path=os.path.join(data_path,formula+"_neighborhood")
-    #     os.makedirs(neigh_path,exist_ok=True)
-        
-    #     with open(os.path.join(neigh_path,"neighborhood_"+str(N_neig)+".txt"),"w") as f:
-    #         f.write("System\tKnown_Structures\n")
-    #         for ne in res:
-    #             DBsearch.get_OQMD_data(ne,neigh_path+"/"+ne+"_")
-    #             DBsearch.get_MP_data(ne,neigh_path+"/"+ne+"_")
-    #             f.write(ne+"\t")
-    #             pos_count=0
-    #             neg_count=0
-    #             if os.path.exists(neigh_path+"/"+ne+"_Known_Structures"):
-    #                 for fname in os.listdir(neigh_path+"/"+ne+"_Known_Structures"):
-    #                     if fname.endswith("pos.cif"):
-    #                         pos_count += 1
-    #                     elif fname.endswith("neg.cif"):
-    #                         neg_count += 1
-    #             f.write(" pos:"+str(pos_count)+" neg:"+str(neg_count)+"\n")
-    #     exit(0)
-
-        
-    # if(BlockSearch!=True):
-    #     res,neigh_list,exchange_dict=get_Neig(formula=formula,N_neig=N_neig)
-
-    #     if(database=="OQMD"):
-    #         if(online==True):
-    #             from PNcsp_Plus.db import OQMDonline
-    #             All_list=OQMDonline.get_data_OQMD(res,neigh_list,Energy_filter=E_filter,timer=time_sleep)
-    #             OQMDonline.create_prototype_OQMD(All_list,exchange_dict,formula=formula,data_path=data_path)
-    #         else:
-    #             from PNcsp_Plus.db import OQMDoffline
-    #             All_list=OQMDoffline.get_data_OQMD(res,neigh_list,Energy_filter=E_filter)
-    #             OQMDoffline.create_prototype_OQMD(All_list,exchange_dict,formula=formula,data_path=data_path)
-    #     elif(database=="MP"):
-    #         from PNcsp_Plus.db import MPonline
-    #         All_list=MPonline.get_data_MP(res,Energy_filter=E_filter)
-    #         MPonline.create_prototype_MP(All_list, exchange_dict, formula=formula, neigh=N_neig,data_path=data_path)
-    #     elif(database=="MPDS"):
-    #         print("WARNING: MPDS implementation is under construction. Choose another data source and run again.")
-    #         exit(0)
-            
-    #     print("TERMINATED SUCCESFULLY!\n")
-    #     categorize(N_neig=N_neig,formula=formula,data_path=data_path)
-    
-    # if(calculator=="M3GNet"):
-    #     # ML.M3GNet_calc("./","./output_"+formula+"/Calc_report/")
-    #     path_results=data_path+"/output_"+formula+"/Calc_report/M3GNet/"
-    #     if(Relax==True):
-    #         ML.M3GNet_calc(formula,path,path_results,relax=True)
-    #     else:
-    #         ML.M3GNet_calc(formula,path,path_results,relax=False)
-
-    # elif(calculator=="ALIGNN"):
-    #     path_results=data_path+"/output_"+formula+"/Calc_report/ALIGNN/"
-    #     if(Relax==True):
-    #         ML.ALIGNN_calc(formula,path,path_results,relax=True)
-    #     else:
-    #         ML.ALIGNN_calc(formula,path,path_results,relax=False)
-    # elif(calculator=="MACE"):
-    #     path_results=data_path+"/output_"+formula+"/Calc_report/MACE/"
-    #     if(Relax==True):
-    #         ML.MACE_calc(formula,path,path_results,relax=True)
-    #     else:
-    #         ML.MACE_calc(formula,path,path_results,relax=False)
-    # elif(calculator=="ensemble"):
-    #     # path_results="./DATA/DATA_180_4NN/output_"+formula+"/Calc_report/ensemble/"
-    #     path_results=data_path+"/output_"+formula+"/Calc_report/ensemble/"
-    #     if(Relax==True):
-    #         print("\nERROR: You can not run Majority Vote with relaxation.\n")
-    #     else:
-    #         # path_alignn="./DATA/DATA_180_4NN/output_"+formula+"/Calc_report/ALIGNN/"
-    #         path_alignn=data_path+"/output_"+formula+"/Calc_report/ALIGNN/"
-    #         ML.ALIGNN_calc(formula,path,path_alignn,relax=False)
-
-    #         # path_mace="./DATA/DATA_180_4NN/output_"+formula+"/Calc_report/MACE/"
-    #         path_mace=data_path+"/output_"+formula+"/Calc_report/MACE/"
-    #         ML.MACE_calc(formula,path,path_mace,relax=False)
-
-    #         # path_m3gnet="./DATA/DATA_180_4NN/output_"+formula+"/Calc_report/M3GNet/"
-    #         path_m3gnet=data_path+"/output_"+formula+"/Calc_report/M3GNet/"
-    #         ML.M3GNet_calc(formula,path,path_m3gnet,relax=False)
-            
-    #         N_model=2 # 2 Model: m3gnet, mace 3 Model: alignn, m3gnet, mace
-    #         ML.ensemble_vote(formula,path_alignn,path_mace,path_m3gnet,path_results,N_model)
-    # else:
-    #     pass
-
-    # if(ReduceData==True): 
-    #     from PNcsp_Plus.db import Tools
-    #     import pandas as pd
-
-    #     GNN_path=data_path+"/output_"+formula+"/Calc_report/"
-
-    #     if not os.path.exists(GNN_path):
-    #         print("Warning: GNN evaluation is missing. Run again with the flag -calc <model_name>!")
-    #         exit(0)
-    #     Model_name_list=os.listdir(GNN_path)
-
-    #     if "ensemble" in Model_name_list:
-    #         my_df=Tools.data_reduction(path,"ensemble")
-    #         # dest_path_csv=os.path.join(path,"Calc_report/ensemble/Reduced")
-    #         # if not os.path.exists(dest_path_csv):
-    #         #     os.makedirs(dest_path_csv)
-    #         dest_path_csv=os.path.join(path,"Calc_report/ensemble")
-    #         dest_path_all=os.path.join(dest_path_csv, "ensemble_"+formula+"_all.csv")
-    #         dest_path_best=os.path.join(dest_path_csv, "ensemble_"+formula+"_best.csv")
-
-    #         my_df.to_csv(dest_path_all,index=False)
-
-    #         my_df=my_df.drop_duplicates(subset=["sym"])
-    #         my_df.to_csv(dest_path_best,index=False)
-    #     else:
-    #         for model_name in Model_name_list:
-    #             my_df=Tools.data_reduction(path,model_name)
-    #             # dest_path_csv=os.path.join(path,"Calc_report/"+model_name,"Reduced")
-    #             # if not os.path.exists(dest_path_csv):
-    #                 # os.makedirs(dest_path_csv)
-    #             dest_path_csv=os.path.join(path,"Calc_report",model_name)
-    #             dest_path_all=os.path.join(dest_path_csv, model_name+"_"+formula+"_all_reduced.csv")
-    #             dest_path_best=os.path.join(dest_path_csv, model_name+"_"+formula+"_best_reduced.csv")
-
-    #             my_df.to_csv(dest_path_all,index=False)
-
-    #             my_df=my_df.drop_duplicates(subset=["sym"])
-    #             my_df.to_csv(dest_path_best,index=False)
-
-    # if(CheckNew==True):
-    #     from PNcsp_Plus.db import DBsearch
-    #     DBsearch.find_unique_data(formula,path)
-    #     if(top_n!="none"):
-    #         tag="all_OnlyNew.csv"
-    #         DBsearch.copy_best_data(path,tag,top_n)
-    #     elif(top_c!="none"):
-    #         tag="all.csv"
-    #         DBsearch.copy_best_data(path,tag,top_c)
-    #     else:
-    #         pass
-    # else:
-    #     if(top_n!="none"):
-    #         from PNcsp_Plus.db import DBsearch
-    #         tag="all_OnlyNew.csv"
-    #         DBsearch.copy_best_data(path,tag,top_n)
-    #     elif(top_c!="none"):
-    #         from PNcsp_Plus.db import DBsearch
-    #         tag="all.csv"
-    #         DBsearch.copy_best_data(path,tag,top_c)
-    #     else:
-    #         pass
-
-
 
 if __name__=='__main__':
     main()

@@ -72,20 +72,64 @@ def table_matcher(path,struc_df,GNN):
     
     return struc_df_matched
 
-def data_reduction(path,GNN):
+# def data_reduction(path,GNN):
+#     from pymatgen.analysis.structure_matcher import StructureMatcher
+#     struc_df=structure_collector(path)
+#     struc_df_matched=table_matcher(path,struc_df,GNN)
+
+#     sm = StructureMatcher()
+#     all_rows = []
+#     for sym, group in struc_df_matched.groupby("sym"):
+#         # group = group.sort_values(by=["Neigh_Order", "Energy"],ascending=[False, True]).reset_index(drop=True)
+#         representatives = []
+#         duplicate_of = []
+#         for i, row in group.iterrows():
+#             current_struct = row["struct"]
+
+#             matched = False
+#             matched_rep_index = None
+
+#             for rep_idx, rep_struct in representatives:
+#                 if sm.fit(current_struct, rep_struct):
+#                     matched = True
+#                     matched_rep_index = rep_idx
+#                     # matched_rep_index = row["CIF_Name"]
+#                     break
+
+#             if matched:
+#                 duplicate_of.append(matched_rep_index)
+#             else:
+#                 representatives.append((row["CIF_Name"], current_struct))
+#                 duplicate_of.append(None)
+#         group["duplicate_of"] = duplicate_of
+#         group["is_unique"] = group["duplicate_of"].isna()
+    
+#         all_rows.append(group)
+
+#     my_df=pd.concat(all_rows, ignore_index=True)
+#     my_df.drop(["struct"],axis=1,inplace=True)
+#     my_df = my_df[my_df["duplicate_of"].isna()]
+#     my_df.drop(["duplicate_of","is_unique"],axis=1,inplace=True)
+#     my_df = my_df.sort_values(by="Energy")
+#     return my_df
+
+
+def data_reduction(path, GNN):
     from pymatgen.analysis.structure_matcher import StructureMatcher
-    struc_df=structure_collector(path)
-    struc_df_matched=table_matcher(path,struc_df,GNN)
+    import pandas as pd
+    
+    struc_df = structure_collector(path)
+    struc_df_matched = table_matcher(path, struc_df, GNN)
 
     sm = StructureMatcher()
     all_rows = []
+    
+    # --- Step 1: Initial symmetry-grouped filtering ---
     for sym, group in struc_df_matched.groupby("sym"):
-        # group = group.sort_values(by=["Neigh_Order", "Energy"],ascending=[False, True]).reset_index(drop=True)
         representatives = []
         duplicate_of = []
         for i, row in group.iterrows():
             current_struct = row["struct"]
-
             matched = False
             matched_rep_index = None
 
@@ -93,7 +137,6 @@ def data_reduction(path,GNN):
                 if sm.fit(current_struct, rep_struct):
                     matched = True
                     matched_rep_index = rep_idx
-                    # matched_rep_index = row["CIF_Name"]
                     break
 
             if matched:
@@ -101,15 +144,38 @@ def data_reduction(path,GNN):
             else:
                 representatives.append((row["CIF_Name"], current_struct))
                 duplicate_of.append(None)
+                
         group["duplicate_of"] = duplicate_of
         group["is_unique"] = group["duplicate_of"].isna()
-    
         all_rows.append(group)
 
-    my_df=pd.concat(all_rows, ignore_index=True)
-    my_df.drop(["struct"],axis=1,inplace=True)
-    my_df = my_df[my_df["duplicate_of"].isna()]
-    my_df.drop(["duplicate_of","is_unique"],axis=1,inplace=True)
-    my_df = my_df.sort_values(by="Energy")
-    return my_df
+    my_df = pd.concat(all_rows, ignore_index=True)
     
+    # Filter to unique items before global check
+    my_df = my_df[my_df["is_unique"]].copy()
+    my_df = my_df.sort_values(by="Energy").reset_index(drop=True)
+    # --- Step 2: Final global structural similarity check across ALL remaining structures ---
+    global_representatives = []
+    keep_indices = []
+
+    for idx, row in my_df.iterrows():
+        current_struct = row["struct"]
+        is_duplicate = False
+
+        for rep_struct in global_representatives:
+            if sm.fit(current_struct, rep_struct):
+                is_duplicate = True
+                break
+
+        if not is_duplicate:
+            global_representatives.append(current_struct)
+            keep_indices.append(idx)
+
+    # Filter dataframe to keep only globally unique structures
+    my_df = my_df.loc[keep_indices]
+
+    # --- Step 3: Clean up temporary columns and sort ---
+    my_df.drop(columns=["struct", "duplicate_of", "is_unique"], inplace=True)
+    my_df = my_df.sort_values(by="Energy").reset_index(drop=True)
+    
+    return my_df
