@@ -18,12 +18,17 @@ dependencies = [
     "qmpy_rester==0.2.0",
     "numpy==1.26.4",
     "pandas==2.2.3",
+    "matscipy==1.0.0",
+    "mysql-connector-python==9.4.0",
+    "mysqlclient",
     "more-itertools",
     "tensorflow==2.14.0",
     "m3gnet==0.2.4",
     "mace-torch==0.3.14",
     "alignn==2025.4.1",
     "MarkupSafe==2.0.1"
+    "spglib==2.5.0",
+    "pygraphviz==1.11"
 ]
 
 # Expose CLI commands in the terminal automatically
