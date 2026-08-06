@@ -75,6 +75,11 @@ def get_OQMD_data(formula,path):
     def parse_formula_counts(formula):
         matches = re.findall(r'[A-Z][a-z]*|\d+', formula)
         return {matches[i]: int(matches[i+1]) for i in range(0, len(matches), 2)}
+    
+    dest_path = f"{path}Known_Structures/"
+    
+    if not os.path.exists(dest_path):
+            os.makedirs(dest_path)
 
     All_list=[]
     Comp_ordered=offline_order([formula])[0]
@@ -89,11 +94,6 @@ def get_OQMD_data(formula,path):
         comp=raw_data[k]
         delta_e=comp.energy
         target_data["data"].append({"name":comp.name, "spacegroup":comp.spacegroup, "cell":comp.structure.cell, "sites":comp.structure.atoms,"delta_e":delta_e})
-
-    dest_path = f"{path}Known_Structures/"
-
-    if not os.path.exists(dest_path):
-            os.makedirs(dest_path)
 
     for ind_ext, entry in enumerate(target_data['data']):
         name = entry['name']
