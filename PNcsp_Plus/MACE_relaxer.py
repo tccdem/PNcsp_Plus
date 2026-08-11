@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from ase.io import read, write
 import argparse
+import torch
 
 def general_relaxer(atoms, calculator, logfile, fmax=0.05, steps=500, CellFilter=True):
     from ase.optimize.fire import FIRE
@@ -66,7 +67,7 @@ def MACE_calc(formula,path):
         model="medium-mpa-0",        # “small” | “medium” | “large” | medium-mpa-0 etc
         dispersion=False,      # no empirical dispersion correction
         default_dtype="float64",
-        device="cpu"          # or "cpu"
+        device="cuda" if torch.cuda.is_available() else "cpu"
     )
 
     with open(logfile, "a") as f:

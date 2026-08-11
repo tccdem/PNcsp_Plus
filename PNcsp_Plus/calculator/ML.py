@@ -1,6 +1,8 @@
 import os
 import pandas as pd
 from ase.io import read, write
+import torch
+
 
 def find_neigh_list(path):
     if os.path.exists(path):
@@ -132,7 +134,8 @@ def MACE_calc(formula,path,path_results,relax):
         model="medium-mpa-0",        # “small” | “medium” | “large” | medium-mpa-0 etc
         dispersion=False,      # no empirical dispersion correction
         default_dtype="float64",
-        device="cpu"          # or "cpu"
+        # device="cpu"          # or "cpu"
+        device="cuda" if torch.cuda.is_available() else "cpu"
     )
 
     if relax==True:

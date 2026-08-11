@@ -227,14 +227,6 @@ def run(formula,N_neig=1,E_filter=0,time_sleep=None,online="False",calculator=No
                 data_path=data_path,CheckNew=CheckNew,top_n=top_n,top_c=top_c,Reverse=Reverse,StoreData=StoreData)
     path=data_path+"/output_"+formula+"/"
 
-    if(StoreData==True):
-        from PNcsp_Plus.db import DBconnector
-        if calculator==None:
-            print("Error: Calculator is missing! Enter the calculator (MACE, M3GNet, ALIGNN).")
-            return(None)
-        DBconnector.upload_data(data_path, formula, calculator, dim, project)
-        return(None)
-
     if(Reverse==True):
         res,neigh_list,exchange_dict=get_Neig(formula=formula,N_neig=N_neig)
         neigh_path=os.path.join(data_path,formula+"_neighborhood")
@@ -399,6 +391,19 @@ def run(formula,N_neig=1,E_filter=0,time_sleep=None,online="False",calculator=No
             DBsearch.copy_best_data(path,tag,top_c)
         else:
             pass
+
+    if(StoreData==True):
+        from PNcsp_Plus.db import DBconnector
+        if calculator==None:
+            print("Error: Calculator is missing! Enter the calculator (MACE, M3GNet, ALIGNN).")
+            return(None)
+        if dim==None:
+            print("Error: Dimension is missing! Enter the dimension.")
+            return(None)
+        # if project==None:
+        #     print("Error: Project is missing! Enter the project.")
+        #     return(None)
+        DBconnector.upload_data(data_path, formula, calculator, dim, project)
 
 def main(args_list=None):
 
