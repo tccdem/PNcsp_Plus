@@ -13,8 +13,8 @@ PNcsp+ with its default configuration scans a local instance of the [OQMD](https
 
 **PLEASE NOTE:** the PNcsp code is under active development. Bug reports are welcomed in the GitHub issues!
 
-### Installation & Usage
-This program is based on Python 3 under Anaconda. 
+## Installation
+**This program is based on Python 3 under Anaconda.** 
 
 1) Clone the repository.
 2) Open terminal and locate the PNcsp_Plus directory.
@@ -22,13 +22,13 @@ This program is based on Python 3 under Anaconda.
 ```bash
    pip install .
 ```
-4) Set up your OQMD and MP credentials:
+4) Create OQMD and MP Database config files:
 ```bash
 mkdir ~/.config/PNsp
 cd ~/.config/PNcsp
 touch db.env
 ```
-Add your OQMD and MP credentials to db.env as shown below:
+5) Add your OQMD and MP Database credentials to db.env as shown below:
 ```
 qmdb_v1_1_name=database_name
 qmdb_v1_1_user=oqmd_user
@@ -37,7 +37,7 @@ qmdb_v1_1_host=localhost/IP
 qmdb_v1_1_port=3306
 mp_key=your_MP_key
 ```
-5) Troubleshooting:
+### Troubleshooting:
 
 If pygraphviz fails to install, try installing system graphviz headers first:
 ```
@@ -52,16 +52,12 @@ MariaDB Installation if needed:
 ```
 sudo apt install mariadb-server mariadb-client
 ```
+## Usage
 
-6) Help page:
+### Help page:
 ```bash
-   python PNcsp.py -h
+python PNcsp.py -h
 ```
-7) Run the Python code (minimal):
-```bash
-  PNcsp <formula> -n <neighbor_order>  -f <energy_filter> -c <calculator>
-```
-
 - `-n`, `--neighbor`  
   Order of neighbors to be considered in the similarity search.
   **Default:** `1`.
@@ -113,14 +109,43 @@ sudo apt install mariadb-server mariadb-client
 - `-top_c`, `--top_n_calc`  
   Copies the top-n evaluated structures, ranked by the GNN evaluation, to the Best_Structures folder if available [`int`, `all`, `none`].(default: `none`). 
   Use this option together with `--CheckNew`, or in a subsequent run after a run performed with `--CheckNew`.
+- `--ReduceData`             
+  Removes duplicates.
+- `--Reverse`   
+  Searces neigborhood of given formula
+- `--StoreData`   
+  Stores generated data in local DB. For this option, you should have a local database to store your data.
+- `-project`, `--project`   
+  Assing project name. This option is only used together with `--StoreData` (default: None).
+- `-dim`, `--dimension`   
+  Assing dimension of the crystalline system. This option is only used together with `--StoreData`. (default: None).
 
-
-
-
-Created prototypes are shown in "output" folder in current directory.
-
-### Example usage
+### Run on CLI:
 ```bash
-PNcsp Na2Cl1 -n 3 -f 0.1 -c MACE -out ./output_dir
+PNcsp <formula> -n <neighbor_order>  -f <energy_filter> -c <calculator> -top_c <number_of_best> -out <output_directory> --ReduceData --CheckNew
 ```
+Basic Example:
+```bash
+PNcsp BePd2 -n 4 -c MACE -top_c 5 -out output --ReduceData --CheckNew
+```
+
+Example with data storage (a local database must be established):
+```bash
+PNcsp BePd2 -n 4 -c MACE -top_c 5 -out output --ReduceData --CheckNew --StoreData -dim 3 -project alloy_scan
+```
+
+### Run Inside A Python Script:
+Basic Example:
+```python
+import PNcsp_Plus as PNcsp
+
+PNcsp.run("BePd2", N_neig=4, calculator="MACE", CheckNew=True, ReduceData=True, top_c=5, out="output")
+```
+Example with data storage (a local database must be established):
+```python
+import PNcsp_Plus as PNcsp
+
+PNcsp.run("BePd2", N_neig=4, calculator="MACE", CheckNew=True, ReduceData=True, top_c=5, out="output", StoreData=True, dim=3, project="alloy_scan")
+```
+
 
