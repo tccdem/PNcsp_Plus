@@ -103,12 +103,11 @@ python PNcsp.py -h
   Check if found structures have been already reported in OQMD and MP.
 
 - `-top_n`, `--top_n_new`  
-  Copies the top-n evaluated new structures, ranked by the GNN evaluation, to the Best_Structures folder if available [`int`, `all`, `none`]. (default: `none`).
-  Use this option together with `--CheckNew`, or in a subsequent run after a run performed with `--CheckNew`.
-
+  Copies the top-n evaluated new structures, ranked by the GNN evaluation, to the Best_Structures folder if available [`int`, `all`, `none`]. Use this option together with `--CheckNew`, or in a subsequent run after a run performed with `--CheckNew`.  
+  **Default:** `none`.  
 - `-top_c`, `--top_n_calc`  
-  Copies the top-n evaluated structures, ranked by the GNN evaluation, to the Best_Structures folder if available [`int`, `all`, `none`].(default: `none`). 
-  Use this option together with `--CheckNew`, or in a subsequent run after a run performed with `--CheckNew`.
+  Copies the top-n evaluated structures, ranked by the GNN evaluation, to the Best_Structures folder if available [`int`, `all`, `none`]. Use this option together with `--CheckNew`, or in a subsequent run after a run performed with `--CheckNew`.  
+  **Default:** `none`. 
 - `--ReduceData`             
   Removes duplicates.
 - `--Reverse`   
@@ -116,9 +115,11 @@ python PNcsp.py -h
 - `--StoreData`   
   Stores generated data in local DB. For this option, you should have a local database to store your data.
 - `-project`, `--project`   
-  Assing project name. This option is only used together with `--StoreData` (default: None).
+  Assing project name. This option is only used together with `--StoreData`.  
+   **Default:** `none`.
 - `-dim`, `--dimension`   
-  Assing dimension of the crystalline system. This option is only used together with `--StoreData`. (default: None).
+  Assing dimension of the crystalline system. This option is only used together with `--StoreData`.   
+  **Default:** `none`. 
 
 ### Run on CLI:
 ```bash
