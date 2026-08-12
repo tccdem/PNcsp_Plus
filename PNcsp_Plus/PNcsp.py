@@ -19,8 +19,15 @@ from pymatgen.core import Composition
 from PNcsp_Plus.calculator import ML
 from PNcsp_Plus.db import DBsearch
 
+import math, fractions
+fractions.gcd = math.gcd  # Alias the removed function to math.gcd
+
 # Get the directory where PNcsp.py actually lives
 PACKAGE_DIR = Path(__file__).resolve().parent
+
+def load_config():
+    from dotenv import load_dotenv
+    load_dotenv(Path.home() / ".config/PNcsp/db.env")
 
 def blockPrint():
     sys.stdout = open(os.devnull, 'w')
@@ -227,6 +234,8 @@ def run(formula,N_neig=1,E_filter=0,time_sleep=None,online="False",calculator=No
                 data_path=data_path,CheckNew=CheckNew,top_n=top_n,top_c=top_c,Reverse=Reverse,StoreData=StoreData)
     path=data_path+"/output_"+formula+"/"
 
+    # load_config()
+
     if(Reverse==True):
         res,neigh_list,exchange_dict=get_Neig(formula=formula,N_neig=N_neig)
         neigh_path=os.path.join(data_path,formula+"_neighborhood")
@@ -261,21 +270,18 @@ def run(formula,N_neig=1,E_filter=0,time_sleep=None,online="False",calculator=No
                     All_list=OQMDonline.get_data_OQMD(res,neigh_list,Energy_filter=E_filter,timer=time_sleep)
                     if not All_list:
                         continue
-                        return(None)
                     OQMDonline.create_prototype_OQMD(All_list,exchange_dict,formula=formula,data_path=data_path)
                 else:
                     from PNcsp_Plus.db import OQMDoffline
                     All_list=OQMDoffline.get_data_OQMD(res,neigh_list,Energy_filter=E_filter)
                     if not All_list:
                         continue
-                        return(None)
                     OQMDoffline.create_prototype_OQMD(All_list,exchange_dict,formula=formula,data_path=data_path)
             elif(database=="MP"):
                 from PNcsp_Plus.db import MPonline
                 All_list=MPonline.get_data_MP(res,Energy_filter=E_filter)
                 if not All_list:
                     continue
-                    return(None)
                 MPonline.create_prototype_MP(All_list, exchange_dict, formula=formula, neigh=N_neig,data_path=data_path)
             elif(database=="MPDS"):
                 print("WARNING: MPDS implementation is under construction. Choose another data source and run again.")
@@ -283,6 +289,8 @@ def run(formula,N_neig=1,E_filter=0,time_sleep=None,online="False",calculator=No
             categorize(N_neig=neig,formula=formula,data_path=data_path)
             
         print("STRUCTURE SEARCH TERMINATED SUCCESFULLY!\n")
+        if not os.path.exists(path):
+            return(None)
         
     
     if(calculator=="M3GNet"):
@@ -405,11 +413,15 @@ def run(formula,N_neig=1,E_filter=0,time_sleep=None,online="False",calculator=No
         #     return(None)
         DBconnector.upload_data(data_path, formula, calculator, dim, project)
 
+load_config()
+
 def main(args_list=None):
 
     def parse_None_float(value):
-        if value==None:
-            return None
+        if value == 0:
+            return 0 
+        # if value==None:
+        #     return None
         if type(value) == str:
             if value.lower() == 'none':
                 return None
@@ -418,7 +430,7 @@ def main(args_list=None):
                 return float(value)
             except ValueError:
                 raise argparse.ArgumentTypeError(f"Invalid filter value: '{value}'. Expected a number or 'none'.")
-    
+
     def parse_None_all_int(value):
         if value==None:
             return None

@@ -1,6 +1,13 @@
 import os
 import re
 import pandas as pd
+
+def load_config():
+    from pathlib import Path
+    from dotenv import load_dotenv
+    load_dotenv(Path.home() / ".config/PNcsp/db.env")
+
+load_config()
 def offline_order(Comp_list):
 
     Comp_list_ordered=[]
@@ -21,7 +28,11 @@ def list_OQMD_data(formula):
     from itertools import product
     from math import gcd
     from functools import reduce
+
+    import math, fractions
+    fractions.gcd = math.gcd  # Alias the removed function to math.gcd
     import qmpy
+
 
     def reduce_list(nums):
         g = reduce(gcd, nums)
@@ -128,9 +139,12 @@ def get_MP_data(formula,path):
         # write(filename, struct)
         struct.to(fmt="cif", filename=filename)
 
-    Key_path="/home/cem/PNcsp_Plus/PNcsp_Plus/dev/MP_API_KEY"
-    with open(Key_path, "r") as f:
-        MP_API_KEY = f.readline().strip()
+    # Key_path="/home/cem/PNcsp_Plus/PNcsp_Plus/dev/MP_API_KEY"
+    # with open(Key_path, "r") as f:
+    #     MP_API_KEY = f.readline().strip()
+    
+    MP_API_KEY=os.environ.get("mp_api_key")
+
 
     with MPRester(MP_API_KEY) as mpr:
         fields = [

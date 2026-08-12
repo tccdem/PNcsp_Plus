@@ -22,11 +22,42 @@ This program is based on Python 3 under Anaconda.
 ```bash
    pip install .
 ```
-4) Help page:
+4) Set up your OQMD and MP credentials:
+```bash
+mkdir ~/.config/PNsp
+cd ~/.config/PNcsp
+touch db.env
+```
+Add your OQMD and MP credentials to db.env as shown below:
+```
+qmdb_v1_1_name=database_name
+qmdb_v1_1_user=oqmd_user
+qmdb_v1_1_pswd=YOUR_PASSWORD
+qmdb_v1_1_host=localhost/IP
+qmdb_v1_1_port=3306
+mp_key=your_MP_key
+```
+5) Troubleshooting:
+
+If pygraphviz fails to install, try installing system graphviz headers first:
+```
+sudo apt-get install python3-dev graphviz libgraphviz-dev pkg-config
+```
+
+If mysqlclient fails to install, try conda install:
+```
+conda install -c conda-forge mysqlclient
+```
+MariaDB Installation if needed:
+```
+sudo apt install mariadb-server mariadb-client
+```
+
+6) Help page:
 ```bash
    python PNcsp.py -h
 ```
-5) Run the Python code (minimal):
+7) Run the Python code (minimal):
 ```bash
   PNcsp <formula> -n <neighbor_order>  -f <energy_filter> -c <calculator>
 ```

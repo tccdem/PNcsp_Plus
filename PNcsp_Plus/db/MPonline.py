@@ -1,9 +1,12 @@
 def get_data_MP(comp_list,Energy_filter):
     from mp_api.client import MPRester
+    import os
 
-    Key_path="/home/cem/PNcsp_Plus/PNcsp_Plus/dev/MP_API_KEY"
-    with open(Key_path, "r") as f:
-        MP_API_KEY = f.readline().strip()
+    # Key_path="/home/cem/PNcsp_Plus/PNcsp_Plus/dev/MP_API_KEY"
+    # with open(Key_path, "r") as f:
+    #     MP_API_KEY = f.readline().strip()
+
+    MP_API_KEY=os.environ.get("mp_api_key")
 
     with MPRester(MP_API_KEY) as mpr:
         fields = [
@@ -19,11 +22,22 @@ def get_data_MP(comp_list,Energy_filter):
         All_list=[]
         for comp in comp_list:
             data=mpr.summary.search(formula=comp,fields=fields)
-
-            data_neg = [dat for dat in data if dat.formation_energy_per_atom <= Energy_filter]
-            if data_neg==[]:
+            if data==[]:
+                print(comp,"--> no structure")
                 continue
-            All_list.append(data_neg)
+
+            if Energy_filter!=None:
+                data = [dat for dat in data if dat.formation_energy_per_atom <= Energy_filter]
+
+            if data==[]:
+                print(comp,"--> no structure")
+                continue
+            print(comp)            
+
+            All_list.append(data)
+
+        if(All_list==[]):
+            print("Warning: No candidates were found! TERMINATED!")
         return All_list
     
 def create_prototype_MP(All_list, exchange_dict, formula, neigh,data_path):
