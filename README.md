@@ -59,7 +59,7 @@ sudo apt install mariadb-server mariadb-client
 python PNcsp.py -h
 ```
 - `-n`, `--neighbor`  
-  Order of neighbors to be considered in the similarity search.
+  Order of neighbors to be considered in the similarity search.   
   **Default:** `1`.
 
 - `-f`, `--filter`  
