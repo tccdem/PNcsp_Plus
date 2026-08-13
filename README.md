@@ -35,7 +35,7 @@ qmdb_v1_1_user=oqmd_user
 qmdb_v1_1_pswd=YOUR_PASSWORD
 qmdb_v1_1_host=localhost/IP
 qmdb_v1_1_port=3306
-mp_key=your_MP_key
+mp_api_key=your_MP_key
 ```
 ### Troubleshooting:
 
